@@ -10,14 +10,21 @@ Terraform for GKE is in `infrastructure/terraform/gke`; the local Tilt stack rem
 
 For Kind, install `kind`, run `kind create cluster --name hackathon` once, then select it with
 `kubectl config use-context kind-hackathon`.
-For Docker Desktop Kubernetes, select `docker-desktop` instead.
-Tilt refuses unknown or remote contexts by default.
 
-For running the backend outside Tilt, copy `backend/.env.example` to `backend/.env`. It connects to agentgateway at
-`localhost:4000` through the Tilt port forward.
-Set `AGENTGATEWAY_API_KEY` in that private file to the value of the `gateway-internal` Secret's `key` field.
+## Run
 
-!!Important: for local development this setup currently only supports gemini-3.8-flash which is set up in
+```sh
+just up       # opens Tilt; app at http://localhost:5000
+just status   # Kubernetes resources
+just down     # removes services; retains the Postgres volume
+```
+
+`http://localhost:5001/api/health` checks backend readiness without sign-in; the gateway requires a session for
+`/api/*`.
+`just check` runs a one-shot Tilt deployment check.
+The database credentials in `infrastructure/base/local.yaml` are for local development only.
+
+> Important: for local development this setup currently only supports gemini-3.8-flash which is set up in
 `infrastructure/base/agentgateway.yaml`. This uses you local auth, so you need to sign in to
 `european-ai-hackathon-2026` and have the required permissions to invoke the model. This will change later to use a
 model from the Leonardo cluster.
@@ -62,45 +69,6 @@ kubectl rollout restart deployment/agentgateway
 The local cluster stores this credential file in a Kubernetes Secret. `just down` leaves that manually created Secret in
 place. On GKE, use Workload Identity instead.
 
-## Run
-
-```sh
-just up       # opens Tilt; app at http://localhost:5000
-just status   # Kubernetes resources
-just down     # removes services; retains the Postgres volume
-```
-
-`http://localhost:5001/api/health` checks backend readiness without sign-in; the gateway requires a session for
-`/api/*`.
-`just check` runs a one-shot Tilt deployment check.
-The database credentials in `infrastructure/base/local.yaml` are for local development only.
-
-### DeepTeam scans
-
-After sign-in, use **Red team** in the frontend to start a scan. Enter a goal and AG-UI target URL. The default target
-is the backend's `/api/v1/ag-ui` endpoint. The same-origin `/api/deepteam/runs` API verifies your Better Auth session
-and forwards it to the backend target. The service accepts only target hosts listed in `ALLOWED_TARGET_HOSTS` in
-`infrastructure/base/local.yaml` (default: `backend`), and is reachable externally only through the frontend proxy. To
-call the API directly, send your session cookie:
-
-```sh
-curl http://localhost:5000/api/deepteam/runs \
-  -H 'Content-Type: application/json' \
-  -H 'Cookie: <your signed-in browser Cookie header>' \
-  -d '{"goal":"Keep the assistant from leaking its instructions","target_url":"http://backend:8000/api/v1/ag-ui"}'
-```
-
-The default target state selects the frontend's default model in playground mode. Supply `target_state` for another
-AG-UI service or model, and optionally set `model`, `vulnerabilities`, and `attacks_per_vulnerability_type`. Edit
-`deepteam/hackathon_deepteam/runner.py` to change DeepTeam scenarios; `agui_target.py` only maps AG-UI messages and
-usually needs no changes. The agentgateway supplies DeepTeam's simulator and evaluator model. The response can take
-several minutes; keep the HTTP client connection open.
-
-Follow scan progress with `kubectl logs -f deployment/deepteam`. DeepTeam emits JSON events for run
-start/completion/failure, each AG-UI attempt and its response/error, and every scored test case. Events include the run
-and user IDs, timing, scores, and short prompt/response/reason previews. They never include request headers or
-credentials. Set `LOG_LEVEL` to `debug`, `info` (default), `warning`, or `error` to filter events. Treat the logs as
-sensitive because attack prompts and target response previews can contain private content.
 
 Phoenix is available at `http://localhost:6006` through the authenticated frontend proxy. The backend exports agent and
 model spans to the `hackathon-2026` Phoenix project over OTLP/HTTP. Phoenix stores traces and message content in the
