@@ -1,0 +1,8 @@
+unauthenticated_rejected PASS
+model_catalog PASS
+arithmetic PASS
+english_response PASS
+sse_streaming PASS
+forced_function_call PASS
+four_concurrent_requests PASS
+INFERENCE_READY {'job_id': '62552340', 'host': 'lrdn2905', 'port': 33340, 'model': 'glm-5.3-flash-leonardo', 'profile': 'glm53', 'runtime': 'vllm-backport-sm80-0.13.1', 'release': 'inference/2026-10-20-unified', 'nodes': 'lrdn[2905,3419]', 'checks_passed': 7, 'ready_at': '2026-10-28T12:52:33.010072+01:00', 'slurm_expected_end': '2026-10-28T14:43:16', 'note': 'Service stops about 90 seconds before allocation expiry.'}

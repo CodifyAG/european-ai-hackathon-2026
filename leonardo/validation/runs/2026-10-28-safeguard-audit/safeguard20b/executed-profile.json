@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "id": "safeguard20b",
+  "model_id": "openai/gpt-oss-safeguard-20b",
+  "revision": "8a11e17b25c973a24099d4016bf2e17dd7ec1574",
+  "checkpoint": "safeguard20b",
+  "expected_shards": 3,
+  "runtime": "vllm-backport-sm80-0.13.1",
+  "served_model": "gpt-oss-safeguard-20b-leonardo",
+  "resources": {
+    "nodes": 1,
+    "gpus_per_node": 1,
+    "cpus_per_task": 8,
+    "memory": "120GB",
+    "time": "02:00:00"
+  },
+  "parallelism": {
+    "tensor": 1,
+    "pipeline": 1
+  },
+  "engine_args": [
+    "--dtype",
+    "bfloat16",
+    "--gpu-memory-utilization",
+    "0.85",
+    "--max-model-len",
+    "8192",
+    "--max-num-seqs",
+    "1",
+    "--max-num-batched-tokens",
+    "2048",
+    "--enforce-eager",
+    "--reasoning-parser",
+    "openai_gptoss",
+    "--attention-backend",
+    "TRITON_ATTN"
+  ],
+  "environment": {},
+  "hooks": [],
+  "checks": "minimal",
+  "client": {
+    "local_port": 18091,
+    "timeout_seconds": 120,
+    "chat_template_kwargs": {
+      "reasoning_effort": "low"
+    }
+  },
+  "startup_timeout_seconds": 1800,
+  "validation": "Not yet GPU-validated. Reuse the installed SM80 runtime after the stock image compression stalled; strict native classifier preflight and actual application comparison are required.",
+  "tokenizer_assets": "harmony"
+}

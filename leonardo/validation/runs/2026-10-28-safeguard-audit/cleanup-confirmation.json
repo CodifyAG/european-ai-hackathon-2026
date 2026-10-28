@@ -1,0 +1,49 @@
+{
+  "verified_at_utc": "2026-10-28T12:18:18.646220+00:00",
+  "remote": {
+    "active_job_ids": [],
+    "owned_model_job_ids": [
+      "62552340",
+      "62548448",
+      "62552341",
+      "62544976",
+      "62550035",
+      "62549494"
+    ],
+    "removed_session_files": [
+      "/leonardo_work/EUHPC_D30_031/team_guardrails_a08trc19_codex/safeguard-audit-20261028/users/a08trc19/runs/glm53-4jt484rq/.runtime/api_key",
+      "/leonardo_work/EUHPC_D30_031/team_guardrails_a08trc19_codex/safeguard-audit-20261028/users/a08trc19/runs/safeguard20b-s4jlt_a7/.runtime/api_key",
+      "/leonardo_work/EUHPC_D30_031/team_guardrails_a08trc19_codex/safeguard-audit-20261028/users/a08trc19/runs/safeguard20b-rkvjqouv/.runtime/api_key",
+      "/leonardo_work/EUHPC_D30_031/team_guardrails_a08trc19_codex/safeguard-audit-20261028/users/a08trc19/runs/glm53-w0s8twom/.runtime/api_key",
+      "/leonardo_work/EUHPC_D30_031/team_guardrails_a08trc19_codex/safeguard-audit-20261028/users/a08trc19/runs/safeguard20b-hg7utbed/.runtime/api_key",
+      "/leonardo_work/EUHPC_D30_031/team_guardrails_a08trc19_codex/safeguard-audit-20261028/users/a08trc19/runs/glm53-gb70whur/.runtime/api_key",
+      "/leonardo_work/EUHPC_D30_031/team_guardrails_a08trc19_codex/safeguard-audit-20261028/users/a08trc19/router_token"
+    ],
+    "remaining_registry_files": []
+  },
+  "remote_model_ports": [
+    {
+      "host": "lrdn2905",
+      "port": 33340,
+      "listening": false
+    },
+    {
+      "host": "lrdn3163",
+      "port": 33341,
+      "listening": false
+    }
+  ],
+  "local_ports_listening": {
+    "18090": false,
+    "8300": false,
+    "18386": false,
+    "4300": false,
+    "15301": false,
+    "15321": false,
+    "15322": false
+  },
+  "local_session_files_remaining": [],
+  "sacct": "62544786|install-runtime-vllm-0.31.0|CANCELLED by 25058|0:0|billing=4,cpu=4,gres/tmpfs=10737418240,mem=30000M,node=1|00:32:55|2026-10-28T11:24:27|2026-10-28T11:57:22\n62544791|install-checkpoint-safeguard20b|CANCELLED by 25058|0:0||00:00:00|None|2026-10-28T11:57:22\n62544976|glm53-common|CANCELLED by 25058|0:0|billing=64,cpu=64,gres/gpu=8,mem=960G,node=2|00:39:00|2026-10-28T11:25:22|2026-10-28T12:04:22\n62548010|install-checkpoint-safeguard20b|COMPLETED|0:0|billing=4,cpu=4,gres/tmpfs=10737418240,mem=30000M,node=1|00:00:23|2026-10-28T12:01:07|2026-10-28T12:01:30\n62548448|safeguard20b-common|FAILED|1:0|billing=8,cpu=8,gres/gpu=1,mem=120G,node=1|00:02:17|2026-10-28T12:01:37|2026-10-28T12:03:54\n62549494|glm53-common|CANCELLED by 25058|0:0|billing=64,cpu=64,gres/gpu=8,mem=960G,node=2|00:16:54|2026-10-28T12:23:01|2026-10-28T12:39:55\n62550035|safeguard20b-common|CANCELLED by 25058|0:0|billing=8,cpu=8,gres/gpu=1,mem=120G,node=1|00:20:54|2026-10-28T12:18:57|2026-10-28T12:39:51\n62551922|leonardo-router|CANCELLED by 25058|0:0||00:00:00|None|2026-10-28T12:39:35\n62552340|glm53-common|CANCELLED by 25058|0:0|billing=64,cpu=64,gres/gpu=8,mem=960G,node=2|00:31:31|2026-10-28T12:43:16|2026-10-28T13:14:47\n62552341|safeguard20b-common|CANCELLED by 25058|0:0|billing=8,cpu=8,gres/gpu=1,mem=120G,node=1|00:28:07|2026-10-28T12:46:38|2026-10-28T13:14:45\n\n",
+  "passed": true,
+  "note": "Model allocations are explicitly stopped with CLI down after tests; CANCELLED is intentional cleanup, not a COMPLETED scheduler state."
+}

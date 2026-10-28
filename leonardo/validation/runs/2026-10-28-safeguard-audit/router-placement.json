@@ -1,0 +1,11 @@
+{
+  "started_at_utc": "2026-10-28T11:51:08.320002+00:00",
+  "allocation_job_id": "62552341",
+  "cancelled_pending_cpu_job": "62551922",
+  "placement": "CPU-only overlapping job step inside the existing Safeguard allocation; no additional nodes or GPUs",
+  "cpus": 1,
+  "gres": "none",
+  "port": 43341,
+  "local_launcher_pid": 39268,
+  "server": "Unmodified CLI-prepared router.py serve; cluster link remains disabled"
+}

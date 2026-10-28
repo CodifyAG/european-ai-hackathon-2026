@@ -1,0 +1,8 @@
+{
+  "returncode": 0,
+  "stdout": "HarmonyEncoding\n",
+  "stderr": "",
+  "proxy": "unreachable loopback proxy; readonly local vocabularies",
+  "scope": "Small CPU-only Harmony tokenizer load; not model inference or GPU validation",
+  "checked_at_utc": "2026-10-28T11:17:31.543241+00:00"
+}

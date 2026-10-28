@@ -1,0 +1,11 @@
+{
+  "files": {
+    "o200k_base.tiktoken": 3613922,
+    "cl100k_base.tiktoken": 1681126,
+    "manifest.json": 298
+  },
+  "expected_hashes_verified": true,
+  "redundant_CPU_asset_job_previous_state": "PENDING",
+  "method": "Pinned local CPU helper + SSH transfer + remote complete SHA-256 verification; no GPU network access",
+  "prepared_at_utc": "2026-10-28T11:13:32.730467+00:00"
+}
