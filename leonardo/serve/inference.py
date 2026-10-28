@@ -13,6 +13,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import tokenizer_assets
 
 ROOT = Path(__file__).resolve().parent
 # API checks that must pass before an endpoint is published. Profiles pick a suite with "checks".
@@ -56,6 +57,8 @@ def identifier(value):
 def profile_check(profile):
     if profile['schema_version'] != 1:
         raise ValueError('Unsupported profile schema')
+    if profile.get('tokenizer_assets') not in (None, 'harmony'):
+        raise ValueError('Unknown tokenizer assets')
     for name in ('id', 'checkpoint', 'runtime', 'served_model'):
         identifier(profile[name])
     resources, parallel = profile['resources'], profile['parallelism']
@@ -129,6 +132,8 @@ def preflight(cfg):
     verify_release()
     profile_check(cfg['profile'])
     model = Path(cfg['model_path'])
+    if cfg['profile'].get('tokenizer_assets') == 'harmony':
+        tokenizer_assets.verify(model)
     if (model / 'model.safetensors.index.json').exists():
         shards = sorted(set(load(model / 'model.safetensors.index.json')['weight_map'].values()))
     else:

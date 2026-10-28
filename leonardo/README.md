@@ -298,6 +298,24 @@ repository's manifests, and Leonardo's CPU queue reaches the app's host directly
 ([docs/cluster-link.md](docs/cluster-link.md)). All runs used one operator account and short functional
 prompts; sustained load, long context and multi-account operation are untested.
 
+## Safeguard audit validation (28 October)
+
+The `safeguard20b` profile serves the pinned GPT-OSS-Safeguard-20B on one A100
+with the existing SM80 runtime. `cli.py install safeguard20b` prepares and verifies
+the extra Harmony vocabularies for offline GPU nodes; the profile requests them
+with `tokenizer_assets: "harmony"`. The installer honors site runtime path mappings.
+
+The [actual GLM/Safeguard validation](validation/runs/2026-10-28-safeguard-audit/README.md)
+used GLM on eight A100s (TP4/PP2) and a separate one-A100 classifier, with
+`s_tra_ncc2` / `qos_lowprio`. All 49 application requests were reviewed and owned
+services/keys were cleaned up. This is an optional, authenticated Gateway audit
+integration; direct CLI/router calls do not automatically invoke audit. Call the
+classifier through its internal router path to avoid recursive moderation.
+The documented scopes distinguish startup checks, native protocol checks and
+known synthetic application cases. Embedded profile validation strings are
+historical; the validation registry and linked evidence record the executed bytes.
+See [optional webhook configuration and integration scope](docs/safeguard-audit.md).
+
 ## Contributing and extending
 
 Changes go into `leonardo/` through pull requests to the Codify repository. CI runs these checks; run them

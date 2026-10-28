@@ -1,6 +1,7 @@
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
+import re
 from unittest.mock import Mock, call
 
 import httpx
@@ -271,9 +272,17 @@ def test_tracing_exports_to_phoenix(monkeypatch, api_key) -> None:
     instrument_agent.assert_called_once_with(
         include_content=True, include_binary_content=False
     )
-    instrument_fastapi.assert_called_once_with(
-        app, excluded_urls=".*/api/health,.*/guardrails/request"
-    )
+    instrument_fastapi.assert_called_once()
+    assert instrument_fastapi.call_args.args == (app,)
+    exclusions = instrument_fastapi.call_args.kwargs["excluded_urls"].split(",")
+    for path in (
+        "/api/health",
+        "/guardrails/request",
+        "/guardrails/nemotron/request",
+        "/guardrails/safety/request",
+    ):
+        assert any(re.fullmatch(pattern, path) for pattern in exclusions)
+    assert not any(re.fullmatch(pattern, "/api/v1/ag-ui") for pattern in exclusions)
 
 
 def test_phoenix_spans_include_session_and_user() -> None:

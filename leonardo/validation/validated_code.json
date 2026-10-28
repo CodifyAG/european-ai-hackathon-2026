@@ -371,6 +371,93 @@
         "test_endpoint.py": "a2609712000ce3a4ec1f65c8c6ac2f26a29141cf6dec998974935cb39ac56776",
         "profiles/qwen06b.json": "3fe650803522ffc370b30f6594f83327dacff75c03eb7ffd9e526c37f92a30c3"
       }
+    },
+    "glm53-safeguard-audit": {
+      "date": "2026-10-28",
+      "profile_id": "glm53",
+      "job_id": "62552340",
+      "nodes": 2,
+      "gpus": 8,
+      "parallelism": {
+        "tensor": 4,
+        "pipeline": 2
+      },
+      "qos": "qos_lowprio",
+      "reservation": "s_tra_ncc2",
+      "files_sha256": {
+        "catalog.json": "1d5666397a2d9b2f99161e3710163b7f988810a873cf1e3452057216478b7b62",
+        "client.py": "ad6770d5d47a8530a4a2901cfb7bcd4250af3ab43cd6dac0ff5817a7011cefbe",
+        "hooks/nccl_ep.py": "e2a51d455d1e4e040854b5b97fc7c448fcbebbf89f6c66cff5cd859f976f1630",
+        "hooks/warm_engram.py": "835074a2e39444c6970923bc882de291e4818af0947e05451bd6abcdfbdf9e89",
+        "inference.py": "1b9782bffc325528ef6802c7fd9d2e80efedcb155d78857e56a39344b8b530c5",
+        "lifecycle.py": "1485226c49db2dca8e88cc6e954a13d57865be3eaea0c594ee2a38bc101a65fe",
+        "node.py": "39831151a126e68711096d831e86ed7fa596b3828329cbd7b4bff21746bfb865",
+        "prepare_run.sh": "033bc136770dd19e1508894ab18b9c22c10a48a20071cb2a8588c839324b4ad5",
+        "registry.py": "6257e6fc606e28fd4fb252bfa8ae9bff70b6ae3f8dc162a11744b6a1e3e8519e",
+        "router.py": "3457825bd95f808e53a5a199ee6b9d582cbd162ae6661f54092455822f61bd94",
+        "router.sbatch": "2ae1bf6695b6b126faa7c5723832fd6f0335e676c1896363c8b488c016c26810",
+        "runtime_patches/pp_kv_empty_groups/pp_kv_guard.py": "d87aba9acb44929dc2c3b6edd561ae713b8bc80d2e896bc5f3e5985d19e29aab",
+        "runtime_patches/pp_kv_empty_groups/sitecustomize.py": "6e847d74dee3d59a11e5b9ccf1e5208de486744bb4f10d009ce5ca27003650b7",
+        "serve_model.sbatch": "ed3c145e69dc5d6f958bad6c97104d8aafd91ab23c5d2b6a9c24eb32d5b7d7d6",
+        "site.example.json": "0f5ac6e19e4d709ce13b519d39883ecf13756a500b622d1ab0a49925fdd9af95",
+        "submit_server.sh": "91f1f82e423e1aad97a1827a76a0874e2912130bb4d43d22dad7ed1162d006b9",
+        "team.py": "d717c411c8a402beb66f9d6596aecbbc3d7028011ab9ded48a04c6b0b529d926",
+        "test_endpoint.py": "a2609712000ce3a4ec1f65c8c6ac2f26a29141cf6dec998974935cb39ac56776",
+        "tokenizer_assets.py": "556531c1547ef6661486fac28f6013508765827cfa34e516176500828f7555b8",
+        "profiles/glm53.json": "2d7a409dae396f30c3094a24f2ac93685e1535cd51f34f82b75b555d6f2dafd4"
+      },
+      "profile_data_matches_current": true,
+      "profile_formatting_only_drift": [
+        "profiles/glm53.json"
+      ],
+      "evidence": "runs/2026-10-28-safeguard-audit/glm53",
+      "scope": "One operator. Real CLI up/forward + unmodified router CPU-only step inside Safeguard allocation + loopback Gateway/Challenge 1, same eight known cases repeated: 49 application requests. Not a held-out security or throughput benchmark. Extra vocabularies staged by pinned local CPU helper and verified after SSH transfer; no successful fresh stock-image build is claimed.",
+      "evidence_kind": "job log: seven startup checks plus separately retained application audit evidence"
+    },
+    "safeguard20b": {
+      "date": "2026-10-28",
+      "profile_id": "safeguard20b",
+      "job_id": "62552341",
+      "nodes": 1,
+      "gpus": 1,
+      "parallelism": {
+        "tensor": 1,
+        "pipeline": 1
+      },
+      "qos": "qos_lowprio",
+      "reservation": "s_tra_ncc2",
+      "files_sha256": {
+        "catalog.json": "1d5666397a2d9b2f99161e3710163b7f988810a873cf1e3452057216478b7b62",
+        "client.py": "ad6770d5d47a8530a4a2901cfb7bcd4250af3ab43cd6dac0ff5817a7011cefbe",
+        "hooks/nccl_ep.py": "e2a51d455d1e4e040854b5b97fc7c448fcbebbf89f6c66cff5cd859f976f1630",
+        "hooks/warm_engram.py": "835074a2e39444c6970923bc882de291e4818af0947e05451bd6abcdfbdf9e89",
+        "inference.py": "1b9782bffc325528ef6802c7fd9d2e80efedcb155d78857e56a39344b8b530c5",
+        "lifecycle.py": "1485226c49db2dca8e88cc6e954a13d57865be3eaea0c594ee2a38bc101a65fe",
+        "node.py": "39831151a126e68711096d831e86ed7fa596b3828329cbd7b4bff21746bfb865",
+        "prepare_run.sh": "033bc136770dd19e1508894ab18b9c22c10a48a20071cb2a8588c839324b4ad5",
+        "registry.py": "6257e6fc606e28fd4fb252bfa8ae9bff70b6ae3f8dc162a11744b6a1e3e8519e",
+        "router.py": "3457825bd95f808e53a5a199ee6b9d582cbd162ae6661f54092455822f61bd94",
+        "router.sbatch": "2ae1bf6695b6b126faa7c5723832fd6f0335e676c1896363c8b488c016c26810",
+        "runtime_patches/pp_kv_empty_groups/pp_kv_guard.py": "d87aba9acb44929dc2c3b6edd561ae713b8bc80d2e896bc5f3e5985d19e29aab",
+        "runtime_patches/pp_kv_empty_groups/sitecustomize.py": "6e847d74dee3d59a11e5b9ccf1e5208de486744bb4f10d009ce5ca27003650b7",
+        "serve_model.sbatch": "ed3c145e69dc5d6f958bad6c97104d8aafd91ab23c5d2b6a9c24eb32d5b7d7d6",
+        "site.example.json": "0f5ac6e19e4d709ce13b519d39883ecf13756a500b622d1ab0a49925fdd9af95",
+        "submit_server.sh": "91f1f82e423e1aad97a1827a76a0874e2912130bb4d43d22dad7ed1162d006b9",
+        "team.py": "d717c411c8a402beb66f9d6596aecbbc3d7028011ab9ded48a04c6b0b529d926",
+        "test_endpoint.py": "a2609712000ce3a4ec1f65c8c6ac2f26a29141cf6dec998974935cb39ac56776",
+        "tokenizer_assets.py": "556531c1547ef6661486fac28f6013508765827cfa34e516176500828f7555b8",
+        "profiles/safeguard20b.json": "b77b4a43cbe691b86b6c771eb6d9b22d2e71a12730301673a415485ee2baf5ea"
+      },
+      "profile_data_matches_current": true,
+      "profile_formatting_only_drift": [
+        "profiles/safeguard20b.json"
+      ],
+      "evidence": "runs/2026-10-28-safeguard-audit/safeguard20b",
+      "scope": "One operator. Real CLI up/forward + unmodified router CPU-only step inside Safeguard allocation + loopback Gateway/Challenge 1, same eight known cases repeated: 49 application requests. Not a held-out security or throughput benchmark. Extra vocabularies staged by pinned local CPU helper and verified after SSH transfer; no successful fresh stock-image build is claimed.",
+      "check_suites": {
+        "api-startup.json": 3,
+        "native-protocol.json": 3
+      }
     }
   }
 }

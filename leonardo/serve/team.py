@@ -150,7 +150,9 @@ def install(args):
         checkpoint = profile['checkpoint']
         folder = inference.checkpoint_dir(base, site, checkpoint)
         job_name = ('install-config-' if args.config_only else 'install-checkpoint-') + checkpoint
-        if (folder / 'download_manifest.json').exists() or (args.config_only and (folder / 'config.json').exists()):
+        complete = ((folder / 'download_manifest.json').exists()
+                    and inference.tokenizer_assets.ready(folder, profile.get('tokenizer_assets')))
+        if complete or (args.config_only and (folder / 'config.json').exists()):
             print('checkpoint {}: {} installed'.format(checkpoint, 'configuration' if args.config_only else 'weights'))
         elif job_name in running:
             print('checkpoint {}: job {} is already running'.format(checkpoint, running[job_name]))
@@ -252,7 +254,7 @@ def logs(args):
 def down(args):
     base = site_base(args.base)
     if args.target == 'router':
-        router.down()
+        router.down(base)
         return
     jobs = router.active_jobs()
     targets = []
@@ -272,7 +274,7 @@ def router_command(args):
     if args.action == 'up':
         router.up(base, load_site(base), args.hours, args.restart, router.active_jobs())
     elif args.action == 'down':
-        router.down()
+        router.down(site_base(args.base))
     elif args.action == 'token':
         router.token(base, 'set' if args.set else 'ensure')
         if not args.set:

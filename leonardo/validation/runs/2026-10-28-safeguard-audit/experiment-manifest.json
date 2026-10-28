@@ -1,0 +1,25 @@
+{
+  "frozen_at_utc": "2026-10-28T12:01:08.501034+00:00",
+  "scope": "Leonardo GLM8 A100 TP4/PP2, separate Safeguard A100, actual CLI router + Gateway audit, known B300 cases repeated",
+  "files_sha256": {
+    "deepteam-local/leonardo-safeguard-audit/run.py": "57e1a30368a844fa8fc79d2340f8b5c0333ba85655d8f368533af99af9e36272",
+    "deepteam-local/leonardo-safeguard-audit/review.py": "4ce0d387e71e2f8be6fc2dab440ff413df6cbd551dc41e1b451ec047a931445a",
+    "deepteam-local/leonardo-safeguard-audit/native_preflight.py": "51dbe8360cc83c1de686dda1cc40590e1c3d93c6fe452746541f560066b2e0c5",
+    "deepteam-local/leonardo-safeguard-audit/observe.py": "c0be5d54d90de6927005feeb0dcee79fe40611d370b3e7c337c363015f560230",
+    "deepteam-local/leonardo-safeguard-audit/manage.py": "9e15e5b4fef3376b260fffae47c0f1c6ae7063312bcd71a3591c0d1a38e80b83",
+    "deepteam-local/leonardo-safeguard-audit/preflight.py": "141a043463a78151e43348f916345024c3128b03b607de58098574ad0d39695a",
+    "deepteam-local/leonardo-safeguard-audit/cases.json": "b87e4500e29fcc0a26096ff262f2d00f314760dd82d9c19b470eaf673bc32af3",
+    "git/european-ai-hackathon-2026/backend/hackathon/agent/builder.py": "efe1f1b7c00918f973cd2c131318176d210771c43b97575caf7db7e25698aecc",
+    "git/european-ai-hackathon-2026/backend/hackathon/agent/challenge1.py": "93180ee1afde1af43cd5e349355454ed4dfa3e1600c27ca607651558ff26937d",
+    "git/european-ai-hackathon-2026/backend/hackathon/api/guardrails.py": "837e080e6643e53ca1798826845da678ae2d7415ec845f42d36cf269e214b088",
+    "git/european-ai-hackathon-2026/backend/hackathon/api/nemotron_audit.py": "3adab337d7dc9bfcde4b31b33e15d6c4e58b1cfb03b2bc17bea0f27d9063f759",
+    "git/european-ai-hackathon-2026/backend/hackathon/moderation.py": "aa3bebe369a55b9b2e924977c4a9d5c2ceb725b3d1774649dc44a2e0c45cafb0",
+    "git/european-ai-hackathon-2026/backend/hackathon/config.py": "79efeeb98d6be5fa73f52c2c01f31b27fc6f6fedd2d9e5fe1258857f73e0fb96",
+    "git/european-ai-hackathon-2026/backend/hackathon/extensions/tracing.py": "1413e469bc21b2ad6825175706415569e9ef90f5268a172c1706c0d8086c3ccd",
+    "git/european-ai-hackathon-2026/backend/hackathon/main.py": "75c20c9d37a26565c32d98468cb7ec4d9c263b62a8e81987dd924328ac679047",
+    "deepteam-local/replay_app.py": "c26ab8a38b2c3343e4f9fe4e4730b7c95795ae821ca06313339b7ac3489c4ed7",
+    "git/european-ai-hackathon-2026/backend/hackathon/api/safety_audit.py": "fc090e51c6f8683304abb95a0c1f664aa74f0b612c06b66c3bff9d23d4c58ad3"
+  },
+  "prior_B300_predictions_known": true,
+  "orchestration": "Manual staged run; unmodified CLI forward; router CPU-only step within Safeguard allocation. All GPU work uses s_tra_ncc2/qos_lowprio; three nodes, nine GPUs total."
+}

@@ -1,0 +1,89 @@
+{
+  "unauthenticated_rejected": {
+    "passed": true,
+    "result": {
+      "status": 401
+    }
+  },
+  "model_catalog": {
+    "passed": true,
+    "result": {
+      "object": "list",
+      "data": [
+        {
+          "id": "gpt-oss-safeguard-20b-leonardo",
+          "object": "model",
+          "created": 1793188100,
+          "owned_by": "vllm",
+          "root": "/leonardo_work/EUHPC_D30_031/team_guardrails_a08trc19_codex/safeguard-audit-20261028/checkpoints/safeguard20b",
+          "parent": null,
+          "max_model_len": 8192,
+          "permission": [
+            {
+              "id": "modelperm-94346672ad3597ca",
+              "object": "model_permission",
+              "created": 1793188100,
+              "allow_create_engine": false,
+              "allow_sampling": true,
+              "allow_logprobs": true,
+              "allow_search_indices": false,
+              "allow_view": true,
+              "allow_fine_tuning": false,
+              "organization": "*",
+              "group": null,
+              "is_blocking": false
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "any_completion": {
+    "passed": true,
+    "result": {
+      "elapsed_seconds": 1.719,
+      "response": {
+        "id": "chatcmpl-a790c9fd2a3be846",
+        "object": "chat.completion",
+        "created": 1793188100,
+        "model": "gpt-oss-safeguard-20b-leonardo",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": "[native reasoning omitted]"
+            },
+            "logprobs": null,
+            "finish_reason": "length",
+            "stop_reason": null,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.13.1-c7b22898",
+        "usage": {
+          "prompt_tokens": 76,
+          "total_tokens": 140,
+          "completion_tokens": 64,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      }
+    }
+  }
+}

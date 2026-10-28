@@ -1,0 +1,12 @@
+{
+  "path": "/leonardo_work/EUHPC_D30_031/team_guardrails_a08trc19_codex/glm53/models/zai-org__GLM-5.3-Flash",
+  "metadata_sha256": {
+    "config.json": "bb8f01c42cb92a52ca72e65afb4d5bd8d11aef083cd210e8de25dfb904f23e9f",
+    "tokenizer_config.json": "98b1271574f41abf89427ae2dda030d94dc9478f0edc5a8bd240db213c6fd5fc",
+    "model.safetensors.index.json": "3c3f40366a53c3fd7974b4eab7881a365a98c2a4329150befebab99fe7c18b05"
+  },
+  "shards": 62,
+  "weight_bytes": 328337455672,
+  "scope": "Reused historical checkpoint; metadata hashes and shard sizes, not a fresh full-weight rehash",
+  "all_metadata_match_B300": true
+}

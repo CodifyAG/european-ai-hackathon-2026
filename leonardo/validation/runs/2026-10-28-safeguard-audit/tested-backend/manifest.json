@@ -1,0 +1,15 @@
+{
+  "base_commit": "3795c06e6cfd6c223e222c742823e293d267d92c",
+  "scope": "Historical backend source used for the scored GPU experiment; not imported by the current application.",
+  "sha256": {
+    "hackathon/agent/builder.py": "efe1f1b7c00918f973cd2c131318176d210771c43b97575caf7db7e25698aecc",
+    "hackathon/api/guardrails.py": "837e080e6643e53ca1798826845da678ae2d7415ec845f42d36cf269e214b088",
+    "hackathon/config.py": "79efeeb98d6be5fa73f52c2c01f31b27fc6f6fedd2d9e5fe1258857f73e0fb96",
+    "hackathon/extensions/tracing.py": "1413e469bc21b2ad6825175706415569e9ef90f5268a172c1706c0d8086c3ccd",
+    "hackathon/main.py": "75c20c9d37a26565c32d98468cb7ec4d9c263b62a8e81987dd924328ac679047",
+    "hackathon/api/nemotron_audit.py": "3adab337d7dc9bfcde4b31b33e15d6c4e58b1cfb03b2bc17bea0f27d9063f759",
+    "hackathon/api/safety_audit.py": "fc090e51c6f8683304abb95a0c1f664aa74f0b612c06b66c3bff9d23d4c58ad3",
+    "hackathon/moderation.py": "aa3bebe369a55b9b2e924977c4a9d5c2ceb725b3d1774649dc44a2e0c45cafb0",
+    "hackathon/agent/challenge1.py": "93180ee1afde1af43cd5e349355454ed4dfa3e1600c27ca607651558ff26937d"
+  }
+}
