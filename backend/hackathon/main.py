@@ -5,6 +5,8 @@ import structlog
 import uvicorn
 from fastapi import FastAPI
 
+from hackathon.api.nemotron_audit import router as nemotron_audit_router
+from hackathon.api.safety_audit import router as safety_audit_router
 from hackathon.api.router import router as ag_ui_router
 from hackathon.api.challenges import router as challenges_router
 from hackathon.config import get_settings
@@ -33,6 +35,8 @@ app.add_middleware(LogCorrelationIdMiddleware)
 app.add_exception_handler(Exception, global_exception_handler)
 app.include_router(ag_ui_router)
 app.include_router(challenges_router)
+app.include_router(nemotron_audit_router)
+app.include_router(safety_audit_router)
 if settings.PHOENIX_OTLP_ENDPOINT:
     configure_tracing(
         app, settings.PHOENIX_OTLP_ENDPOINT, api_key=settings.PHOENIX_API_KEY

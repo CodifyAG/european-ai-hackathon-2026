@@ -2,7 +2,7 @@ from functools import lru_cache
 from datetime import datetime
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,6 +18,16 @@ class Settings(BaseSettings):
 
     AGENTGATEWAY_URL: str
     AGENTGATEWAY_API_KEY: str
+    NEMOTRON_AUDIT_ENABLED: bool = False
+    NEMOTRON_AUDIT_MODEL: dict = {}
+    NEMOTRON_AUDIT_WEBHOOK_KEY: SecretStr = SecretStr("")
+    NEMOTRON_AUDIT_EVENTS_FILE: str = ""
+    NEMOTRON_AUDIT_MAX_INPUT_CHARS: int = Field(default=16000, ge=1000, le=100000)
+    SAFETY_AUDIT_ENABLED: bool = False
+    SAFETY_AUDIT_MODEL: dict = {}
+    SAFETY_AUDIT_WEBHOOK_KEY: SecretStr = SecretStr("")
+    SAFETY_AUDIT_EVENTS_FILE: str = ""
+    SAFETY_AUDIT_MAX_INPUT_CHARS: int = Field(default=16000, ge=1000, le=100000)
     AUTH_SERVICE_URL: str = "http://localhost:3005"
     GOOGLE_STORAGE_BUCKET: str
     FILE_STORAGE: Literal["local", "gcs"] = "local"
