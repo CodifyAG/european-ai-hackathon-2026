@@ -143,7 +143,7 @@ def prepare(base, site, hours, restart, jobs):
     if current and current['jobs']:
         if not restart:
             raise ValueError('A router is already running ({}); use --restart to replace it'.format(current['summary']))
-        down()
+        down(base)
     if link['enabled']:
         if not (link['server'] and link['fingerprint']):
             raise ValueError('cluster_link.enabled needs cluster_link.server and cluster_link.fingerprint in the site file')
@@ -197,9 +197,22 @@ def next_job():
     print('Queued successor router job ' + successor)
 
 
-def down():
-    subprocess.call(['scancel', '--name=' + JOB_NAME, '--user=' + getpass.getuser()])
-    print('Cancelled all {} jobs of {}.'.format(JOB_NAME, getpass.getuser()))
+def down(base):
+    """Cancel only router jobs whose Slurm working directory matches this site."""
+    expected = str(paths(base)['directory'].resolve())
+    jobs = active_jobs()
+    if jobs is None:
+        raise RuntimeError('Cannot verify owned router jobs while squeue is unavailable')
+    targets = []
+    for job, entry in jobs.items():
+        if entry['name'] != JOB_NAME:
+            continue
+        record = subprocess.check_output(['scontrol', 'show', 'job', '-o', job]).decode()
+        if ('WorkDir=' + expected) in record.split():
+            targets.append(job)
+    if targets:
+        subprocess.check_call(['scancel'] + targets)
+    print('Cancelled {} router job(s) for {}.'.format(len(targets), expected))
 
 
 def state(base, jobs):
@@ -267,7 +280,7 @@ class Routes:
     def __init__(self, base):
         self.base = base
         self.lock = threading.Lock()
-        self.table, self.scanned, self.jobs, self.jobs_at = {}, 0, None, 0
+        self.table, self.scanned, self.jobs, self.jobs_at = {}, float('-inf'), None, float('-inf')
 
     def current(self):
         with self.lock:

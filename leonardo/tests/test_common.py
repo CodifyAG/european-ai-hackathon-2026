@@ -85,6 +85,34 @@ class Framework(unittest.TestCase):
             for name in shards:
                 (path / name).write_bytes(b'x')
             inference.save(path / 'model.safetensors.index.json', {'weight_map': {str(i): s for i, s in enumerate(shards)}})
+        self.release = self.root / 'release'
+        shutil.copytree(str(RELEASE), str(self.release), ignore=shutil.ignore_patterns('__pycache__'))
+        import tokenizer_assets
+        fixture_hashes = {}
+        for filename in tokenizer_assets.FILES:
+            data = ('synthetic vocabulary: ' + filename).encode()
+            fixture_hashes[filename] = hashlib.sha256(data).hexdigest()
+            for model in MODELS:
+                profile = inference.load(RELEASE / 'profiles' / (model + '.json'))
+                if profile.get('tokenizer_assets') != 'harmony':
+                    continue
+                folder = self.base / 'checkpoints' / profile['checkpoint'] / 'harmony-encodings'
+                folder.mkdir(parents=True, exist_ok=True)
+                (folder / filename).write_bytes(data)
+        assets_path = self.release / 'tokenizer_assets.py'
+        assets_source = assets_path.read_text()
+        for filename, actual_hash in tokenizer_assets.FILES.items():
+            assets_source = assets_source.replace(actual_hash, fixture_hashes[filename])
+        assets_path.write_text(assets_source)
+        for model in MODELS:
+            profile = inference.load(RELEASE / 'profiles' / (model + '.json'))
+            if profile.get('tokenizer_assets') == 'harmony':
+                folder = self.base / 'checkpoints' / profile['checkpoint'] / 'harmony-encodings'
+                inference.save(folder / 'manifest.json', {'sha256': fixture_hashes})
+        manifest_path = self.release / 'RELEASE_MANIFEST.json'
+        manifest = inference.load(manifest_path)
+        manifest['files']['tokenizer_assets.py'] = hashlib.sha256(assets_path.read_bytes()).hexdigest()
+        inference.save(manifest_path, manifest)
         self.runs = self.base / 'users' / getpass.getuser() / 'runs'
 
     def tearDown(self):
@@ -103,7 +131,7 @@ class Framework(unittest.TestCase):
         path.chmod(0o700)
 
     def prepare(self, model):
-        output = subprocess.check_output([sys.executable, str(RELEASE / 'inference.py'), 'prepare', model, '--base', str(self.base)], env=self.env, stderr=subprocess.PIPE)
+        output = subprocess.check_output([sys.executable, str(self.release / 'inference.py'), 'prepare', model, '--base', str(self.base)], env=self.env, stderr=subprocess.PIPE)
         return Path(output.decode().strip())
 
     def test_private_pinned_runs_and_runtime_reuse(self):

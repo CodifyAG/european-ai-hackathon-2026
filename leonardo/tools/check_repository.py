@@ -58,9 +58,11 @@ def main():
             log = (evidence / 'job-log.txt').read_text()
             assert 'INFERENCE_READY' in log and ' FAIL' not in log and log.count(' PASS\n') == 7, 'Incomplete evidence: ' + model
             continue
-        for suite in ('api-startup.json', 'api-client-1.json', 'api-client-2.json'):
+        suites = run.get('check_suites', {'api-startup.json': 7, 'api-client-1.json': 7, 'api-client-2.json': 7})
+        for suite, count in suites.items():
             checks = json.loads((evidence / suite).read_text())
-            assert len(checks) == 7 and all(c['passed'] for c in checks.values()), 'Incomplete evidence: ' + model + '/' + suite
+            assert type(count) is int and count > 0
+            assert len(checks) == count and all(c['passed'] is True for c in checks.values()), 'Incomplete evidence: ' + model + '/' + suite
     print('PASS: syntax for {} scripts, manifest, agentgateway config, GPU evidence and local document links.'.format(checked))
     # Each run validated the serve/ files it ran with: its own files_sha256, or the shared set of the first runs.
     # Of the profiles, only the run's own counts: other profiles changing or appearing does not affect it.

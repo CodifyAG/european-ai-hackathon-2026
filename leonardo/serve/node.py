@@ -27,6 +27,10 @@ def container_command(cfg, command, gpu=True):
                  'PYTHONPATH': cfg['overlay'], 'TMPDIR': '/tmp/inference-tmp',
                  'NCCL_ALGO': 'Ring', 'NCCL_PROTO': 'Simple', 'NCCL_DEBUG': 'INFO', 'NCCL_DEBUG_SUBSYS': 'INIT,NET'}
     variables.update(cfg['profile'].get('environment', {}))
+    if cfg['profile'].get('tokenizer_assets') == 'harmony':
+        encodings = str(Path(cfg['model_path']) / 'harmony-encodings')
+        variables.update(TIKTOKEN_ENCODINGS_BASE=encodings, TIKTOKEN_CACHE_DIR=encodings,
+                         TIKTOKEN_RS_CACHE_DIR=encodings)
     directories = {'HF_HOME': 'hf', 'VLLM_CACHE_ROOT': 'vllm', 'TRITON_CACHE_DIR': 'triton',
                    'TORCHINDUCTOR_CACHE_DIR': 'inductor', 'XDG_CACHE_HOME': 'xdg',
                    'FLASHINFER_WORKSPACE_BASE': 'flashinfer-root', 'TILELANG_CACHE_DIR': 'tilelang'}

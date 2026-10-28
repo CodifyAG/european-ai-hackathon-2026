@@ -27,7 +27,14 @@ print(p["model_id"], p.get("revision") or "-", p["checkpoint"], p["runtime"])' "
 if [[ "$PROFILE_REVISION" != - ]]; then MODEL_REVISION="$PROFILE_REVISION"; fi
 # glm53.json has no "revision" field and stays byte-identical to the GPU-validated file.
 if [[ "$NAME" == glm53 ]]; then MODEL_REVISION=91b69215804f2d2036a8867f6ce44848e278dcda; fi
-SIF="$BASE/runtimes/$RUNTIME/image.sif"
+SIF=$(PYTHONPATH="$RELEASE/serve" python3 -c 'import json,sys
+from pathlib import Path
+import inference
+base=Path(sys.argv[1]); runtime_id=sys.argv[2]
+folder=inference.runtime_dir(base,inference.load_site(base),runtime_id)
+registration=inference.load(folder/"runtime.json")
+assert registration["id"]==runtime_id, "Runtime registration mismatch"
+print(folder/registration["sif"])' "$BASE" "$RUNTIME")
 mkdir -p "$BASE/checkpoints" "$BASE/staging/hf-cache"
 export SINGULARITYENV_MODEL_ID="$MODEL_ID"
 export SINGULARITYENV_MODEL_REVISION="${MODEL_REVISION:-}"
@@ -82,4 +89,8 @@ manifest = {"repo": repo, "revision": revision, "weight_bytes": needed,
 (directory / "download_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 print("CHECKPOINT_READY", directory, "revision", revision, "shards", len(shards), flush=True)
 PY
+ASSETS=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("tokenizer_assets", ""))' "$RELEASE/serve/profiles/$NAME.json")
+if [[ "$ASSETS" == harmony ]]; then
+    python3 "$RELEASE/serve/tokenizer_assets.py" "$BASE/checkpoints/$CHECKPOINT"
+fi
 du -sh "$BASE/checkpoints/$CHECKPOINT"

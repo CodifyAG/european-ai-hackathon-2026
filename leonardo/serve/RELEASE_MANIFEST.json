@@ -5,19 +5,20 @@
     "client.py": "ad6770d5d47a8530a4a2901cfb7bcd4250af3ab43cd6dac0ff5817a7011cefbe",
     "hooks/nccl_ep.py": "e2a51d455d1e4e040854b5b97fc7c448fcbebbf89f6c66cff5cd859f976f1630",
     "hooks/warm_engram.py": "835074a2e39444c6970923bc882de291e4818af0947e05451bd6abcdfbdf9e89",
-    "inference.py": "e0a89b812e149d1b4da4ccc77185d84b2a8159a6bb8776895ce0f8f829da5c0b",
+    "inference.py": "1b9782bffc325528ef6802c7fd9d2e80efedcb155d78857e56a39344b8b530c5",
     "lifecycle.py": "1485226c49db2dca8e88cc6e954a13d57865be3eaea0c594ee2a38bc101a65fe",
-    "node.py": "21e5fa9874932174cc3078af01b2d92b5dad26d122350b2cb227ed1546c4efe8",
+    "node.py": "39831151a126e68711096d831e86ed7fa596b3828329cbd7b4bff21746bfb865",
     "prepare_run.sh": "033bc136770dd19e1508894ab18b9c22c10a48a20071cb2a8588c839324b4ad5",
     "registry.py": "6257e6fc606e28fd4fb252bfa8ae9bff70b6ae3f8dc162a11744b6a1e3e8519e",
-    "router.py": "ceddcc5dc8aedd8d86e469d530d535176047e89e9bdd1a378f9e356cacd07064",
+    "router.py": "be759288f573ac47b0be20fb8cc7b5d492567b7771c53e2e900281f20305678f",
     "router.sbatch": "2ae1bf6695b6b126faa7c5723832fd6f0335e676c1896363c8b488c016c26810",
     "runtime_patches/pp_kv_empty_groups/pp_kv_guard.py": "d87aba9acb44929dc2c3b6edd561ae713b8bc80d2e896bc5f3e5985d19e29aab",
     "runtime_patches/pp_kv_empty_groups/sitecustomize.py": "6e847d74dee3d59a11e5b9ccf1e5208de486744bb4f10d009ce5ca27003650b7",
     "serve_model.sbatch": "ed3c145e69dc5d6f958bad6c97104d8aafd91ab23c5d2b6a9c24eb32d5b7d7d6",
     "site.example.json": "0f5ac6e19e4d709ce13b519d39883ecf13756a500b622d1ab0a49925fdd9af95",
     "submit_server.sh": "91f1f82e423e1aad97a1827a76a0874e2912130bb4d43d22dad7ed1162d006b9",
-    "team.py": "3c4a4219a97ba6f189e042cb57c76d0ce49eb5a95e56084d69ec80f58cad78e5",
-    "test_endpoint.py": "a2609712000ce3a4ec1f65c8c6ac2f26a29141cf6dec998974935cb39ac56776"
+    "team.py": "d717c411c8a402beb66f9d6596aecbbc3d7028011ab9ded48a04c6b0b529d926",
+    "test_endpoint.py": "a2609712000ce3a4ec1f65c8c6ac2f26a29141cf6dec998974935cb39ac56776",
+    "tokenizer_assets.py": "556531c1547ef6661486fac28f6013508765827cfa34e516176500828f7555b8"
   }
 }
