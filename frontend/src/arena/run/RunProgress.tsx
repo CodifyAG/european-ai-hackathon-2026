@@ -1,7 +1,8 @@
 import { AlertTriangleIcon, CheckIcon, Loader2Icon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { type CSSProperties, useMemo, useState } from "react";
 import { Led } from "@/components/led";
 import { Card } from "@/components/ui/card";
+import { Progress as ProgressBar } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { getLevel } from "../api";
 import { ExpandableText, OutcomeBadge } from "../components";
@@ -34,7 +35,6 @@ function ProgressCard({
 	tone: "red" | "green";
 	stats: { label: string; value: number; dot: string }[];
 }) {
-	const pct = progress.total > 0 ? (progress.done / progress.total) * 100 : 0;
 	return (
 		<Card
 			accent={
@@ -53,29 +53,29 @@ function ProgressCard({
 				>
 					{title}
 				</h2>
-				<span className="text-2xl font-semibold tracking-tight tabular-nums">
+				<span className="font-mono text-4xl font-semibold tracking-tight tabular-nums">
 					{progress.done}
 				</span>
 				<span className="text-sm text-muted-foreground">
 					/ {progress.total} {unit}
 				</span>
 			</div>
-			<div
-				role="progressbar"
+			<ProgressBar
 				aria-label={`${title} cases done`}
-				aria-valuemin={0}
-				aria-valuemax={progress.total}
-				aria-valuenow={progress.done}
-				className="h-2 overflow-hidden rounded-full bg-muted"
-			>
-				<div
-					className={cn(
-						"h-full rounded-full transition-[width]",
-						tone === "red" ? "bg-arena-attacker" : "bg-arena-defender",
-					)}
-					style={{ width: `${pct}%` }}
-				/>
-			</div>
+				value={progress.done}
+				max={Math.max(1, progress.total)}
+				aria-valuetext={`${progress.done} of ${progress.total} cases done`}
+				cells={24}
+				style={
+					{
+						"--phosphor":
+							tone === "red"
+								? "var(--arena-attacker)"
+								: "var(--arena-defender)",
+					} as CSSProperties
+				}
+			/>
+
 			<dl className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-muted-foreground">
 				{stats.map((stat) => (
 					<div key={stat.label} className="flex items-center gap-1.5">

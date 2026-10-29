@@ -81,6 +81,7 @@ function withoutGuardrails(level: LevelDetail): LevelDetail {
 }
 
 const routes = {
+	"/api/v1/arena/runs": [],
 	"/api/v1/arena/levels": levelsFixture,
 	"/api/v1/arena/levels/hidden-mailbox/hard": hiddenMailboxHard,
 	"/api/v1/arena/levels/hidden-mailbox/medium":

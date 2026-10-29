@@ -9,6 +9,7 @@ import {
 	SurfaceBadge,
 } from "./components";
 import { arenaHref } from "./router";
+import { RunHistory } from "./run/RunHistory";
 import { RunList } from "./run/RunList";
 import type { LevelSummary } from "./types";
 import { useArenaQuery } from "./useArenaQuery";
@@ -17,7 +18,7 @@ function LevelCard({ level }: { level: LevelSummary }) {
 	const first = level.difficulties[0] ?? "easy";
 	return (
 		<li className="flex">
-			<Card className="w-full p-5">
+			<Card className="w-full gap-2 p-3">
 				<div className="flex flex-wrap items-center gap-2">
 					<SurfaceBadge channel={level.channel} turns={level.turns} />
 					{level.modified && (
@@ -37,8 +38,8 @@ function LevelCard({ level }: { level: LevelSummary }) {
 						</span>
 					)}
 				</div>
-				<div className="flex flex-col gap-1.5">
-					<h2 className="text-base font-semibold tracking-tight">
+				<div className="flex flex-col gap-1">
+					<h2 className="text-sm font-semibold tracking-tight">
 						<a
 							href={arenaHref({
 								name: "level",
@@ -50,37 +51,22 @@ function LevelCard({ level }: { level: LevelSummary }) {
 							{level.title}
 						</a>
 					</h2>
-					<p className="text-sm leading-relaxed text-muted-foreground">
+					<p
+						title={level.description}
+						className="line-clamp-2 text-xs leading-relaxed text-muted-foreground"
+					>
 						{level.description}
 					</p>
 				</div>
-				<dl className="grid grid-cols-2 gap-2 text-[13px]">
-					<div className="rounded-none bg-card px-3 py-2">
-						<dt className="text-muted-foreground">Attacker</dt>
-						<dd className="font-medium">
-							{level.channel === "direct"
-								? "Chat user (direct)"
-								: "Planted data (indirect)"}
-						</dd>
-					</div>
-					<div className="rounded-none bg-card px-3 py-2">
-						<dt className="text-muted-foreground">Turns</dt>
-						<dd className="font-medium">
-							{level.turns === "multi"
-								? "Multi-turn conversation"
-								: "Single turn per case"}
-						</dd>
-					</div>
-				</dl>
 				<nav
 					aria-label={`${level.title} difficulties`}
-					className="mt-auto flex flex-wrap gap-2"
+					className="mt-auto flex flex-wrap gap-1.5 pt-1"
 				>
 					{level.difficulties.map((difficulty) => (
 						<a
 							key={difficulty}
 							href={arenaHref({ name: "level", level: level.id, difficulty })}
-							className="flex items-center gap-1.5 rounded-none border px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
+							className="flex items-center gap-1.5 rounded-none border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
 						>
 							{difficultyLabel(difficulty)}
 							<ArrowRightIcon className="size-3.5" aria-hidden="true" />
@@ -100,12 +86,11 @@ export function LevelList() {
 	return (
 		<ArenaShell crumbs={[{ label: "Levels" }]}>
 			<div className="min-h-0 flex-1 overflow-y-auto">
-				<div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
+				<div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6">
 					<div className="flex flex-col gap-1">
 						<h1 className="text-xl font-semibold tracking-tight">Levels</h1>
 						<p className="text-sm text-muted-foreground">
-							Each level is described by a config file. Open a level to see its
-							execution graph, guardrails and prompts.
+							Select a level to configure and start an evaluation.
 						</p>
 					</div>
 					{query.loading && !query.data && (
@@ -121,7 +106,7 @@ export function LevelList() {
 					{query.data && !query.error && (
 						<ul
 							aria-label="Levels"
-							className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+							className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3"
 						>
 							{query.data.map((level) => (
 								<LevelCard key={level.id} level={level} />
@@ -153,6 +138,7 @@ export function LevelList() {
 							<RunList levelTitles={levelTitles} />
 						</div>
 					</section>
+					<RunHistory levels={query.data ?? []} />
 				</div>
 			</div>
 		</ArenaShell>
