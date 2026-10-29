@@ -469,6 +469,7 @@ export interface SuccessCheckData {
 }
 
 export interface RunDetail extends RunSummary {
+	red_team_scratchpad?: string;
 	/** Level graph at run time, for the live sample; the UI falls back to the level graph. */
 	graph?: ArenaGraph | null;
 	models: RoleModel[];

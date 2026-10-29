@@ -103,6 +103,7 @@ RUN_DETAIL = RUN_SUMMARY | {
     "sources",
     "cases",
     "live",
+    "red_team_scratchpad",
 }
 COUNTS = {"succeeded", "defended", "false_positive", "passed", "error"}
 CASE_SUMMARY = {
@@ -246,6 +247,7 @@ def check_run_summary(
 
 def check_run_detail(run: dict[str, Any]) -> None:
     check_run_summary(run, "run detail", RUN_DETAIL)
+    assert isinstance(run["red_team_scratchpad"], str)
     check_graph(run["graph"])
     for model in run["models"]:
         keys(model, ROLE_MODEL, f"model {model['role']}")
