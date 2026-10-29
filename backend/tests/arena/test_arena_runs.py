@@ -69,7 +69,7 @@ class FakeRedTeam:
         self.driven: list[dict[str, Any]] = []
         self.drive_hook = None
 
-    async def generate(self, level, *, run_id, attacks):
+    async def generate(self, level, *, run_id, attacks, scratchpad=None):
         self.generated.append(list(attacks))
         for attack_type, count in attacks:
             for _ in range(count):
@@ -85,7 +85,9 @@ class FakeRedTeam:
                         "content": placeholder_content(level, n),
                     }
 
-    async def drive(self, level, *, case_id, attack_type, max_turns, callback):
+    async def drive(
+        self, level, *, case_id, attack_type, max_turns, callback, scratchpad=None
+    ):
         self.driven.append(
             {"case_id": case_id, "attack_type": attack_type, "max_turns": max_turns}
         )
@@ -245,6 +247,93 @@ class Harness:
 
 def by_label(cases):
     return {case["label"]: case for case in cases}
+
+
+@pytest.mark.asyncio
+async def test_shared_red_scratchpad_is_atomic_scoped_and_saved_after_run():
+    release = asyncio.Event()
+    callbacks = []
+
+    class WaitingRed(FakeRedTeam):
+        async def generate(self, level, *, run_id, attacks, scratchpad=None):
+            callbacks.append((run_id, scratchpad))
+            await release.wait()
+            async for case in super().generate(
+                level, run_id=run_id, attacks=attacks, scratchpad=scratchpad
+            ):
+                yield case
+
+    harness = Harness(red=WaitingRed(), catalog=mixed_attack_catalog())
+    first = await harness.start("hidden-mailbox", "easy")
+    second = await harness.start("hidden-mailbox", "easy")
+    run_id = first["id"]
+    token = harness.runs.active[run_id].token
+    other_token = harness.runs.active[second["id"]].token
+    path = f"/api/v1/arena/internal/runs/{run_id}/scratchpad"
+    headers = {"x-arena-token": token}
+    try:
+        assert (await harness.http.get(path)).status_code == 403
+        assert (
+            await harness.http.get(path, headers={"x-arena-token": other_token})
+        ).status_code == 403
+        assert (
+            await harness.http.get(
+                path, headers={**headers, "x-forwarded-for": "127.0.0.1"}
+            )
+        ).status_code == 404
+        for text in ("", "   ", "x" * 2001):
+            assert (
+                await harness.http.post(path, headers=headers, json={"text": text})
+            ).status_code == 422
+        responses = await asyncio.gather(
+            *(
+                harness.http.post(path, headers=headers, json={"text": f"finding-{i}"})
+                for i in range(16)
+            )
+        )
+        assert all(r.status_code == 200 for r in responses)
+        notes = (await harness.http.get(path, headers=headers)).json()["text"]
+        assert set(notes.splitlines()) == {f"finding-{i}" for i in range(16)}
+        assert (await harness.runs.scratchpad(second["id"], other_token))["text"] == ""
+        assert callbacks and all(
+            c["url"].endswith(f"/runs/{rid}/scratchpad") for rid, c in callbacks
+        )
+    finally:
+        release.set()
+        await harness.runs.wait(run_id)
+        await harness.runs.wait(second["id"])
+    detail = await harness.get(f"/runs/{run_id}")
+    assert "finding-0" in detail["red_team_scratchpad"]
+    assert "Result " in detail["red_team_scratchpad"]
+    assert token not in json.dumps(await harness.runs.export(run_id))
+    assert (
+        await harness.http.post(path, headers=headers, json={"text": "too late"})
+    ).status_code == 404
+    saved = await harness.store.get_run(run_id)
+    assert saved["red_team_scratchpad"] == detail["red_team_scratchpad"]
+
+
+@pytest.mark.asyncio
+async def test_shared_red_scratchpad_keeps_a_bounded_recent_history():
+    release = asyncio.Event()
+
+    class WaitingRed(FakeRedTeam):
+        async def generate(self, level, *, run_id, attacks, scratchpad=None):
+            await release.wait()
+            async for case in super().generate(level, run_id=run_id, attacks=attacks):
+                yield case
+
+    harness = Harness(red=WaitingRed(), catalog=mixed_attack_catalog())
+    run = await harness.start("hidden-mailbox", "easy")
+    token = harness.runs.active[run["id"]].token
+    try:
+        for i in range(12):
+            notes = await harness.runs.scratchpad(run["id"], token, str(i % 10) * 1800)
+        assert len(notes["text"]) == 16000
+        assert notes["text"].endswith("1" * 1800)
+    finally:
+        release.set()
+        await harness.runs.wait(run["id"])
 
 
 def mixed_attack_catalog():
@@ -649,7 +738,7 @@ async def test_generation_shares_eight_slots_per_run_and_stop_cancels_every_sour
             running[run_id] -= 1
 
     class Red(FakeRedTeam):
-        async def generate(self, level, *, run_id, attacks):
+        async def generate(self, level, *, run_id, attacks, scratchpad=None):
             await wait_for_release("red", run_id)
             async for case in super().generate(level, run_id=run_id, attacks=attacks):
                 yield case
@@ -1065,7 +1154,7 @@ async def test_unexpected_red_generation_failure_errors_red_cases_and_green_stil
 @pytest.mark.asyncio
 async def test_generated_cases_are_held_to_the_configured_counts():
     class Sloppy(FakeRedTeam):
-        async def generate(self, level, *, run_id, attacks):
+        async def generate(self, level, *, run_id, attacks, scratchpad=None):
             yield {"attack_type": "prompt_injection", "content": {"subject": "<s>"}}
             for n in range(7):  # 7 > 5 configured
                 yield {

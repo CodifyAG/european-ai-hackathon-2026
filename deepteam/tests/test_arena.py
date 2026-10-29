@@ -172,6 +172,120 @@ async def test_structured_model_request_uses_schema_and_rejects_truncation(monke
 
 
 @pytest.mark.asyncio
+async def test_model_reads_fresh_run_notes_without_exposing_callback_token(monkeypatch):
+    shared = {"text": "First agent discovered a useful approach", "status": 200}
+    calls = []
+    original_client = httpx.AsyncClient
+
+    def handle(request):
+        assert request.method == "GET"
+        assert request.headers["x-arena-token"] == "private-run-token"
+        return httpx.Response(shared["status"], json={"text": shared["text"]})
+
+    monkeypatch.setattr(
+        arena.httpx,
+        "AsyncClient",
+        lambda **kwargs: original_client(
+            transport=httpx.MockTransport(handle), **kwargs
+        ),
+    )
+
+    async def create(**kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(
+            choices=[
+                SimpleNamespace(
+                    finish_reason="stop",
+                    message=SimpleNamespace(content='{"input":"hello"}'),
+                )
+            ]
+        )
+
+    model = arena.ArenaLocalModel(
+        model="test", api_key="unused", base_url="http://localhost:11434/v1"
+    )
+    model.scratchpad = arena.Callback(
+        url="http://backend:8000/scratchpad", token="private-run-token"
+    )
+    monkeypatch.setattr(
+        model,
+        "load_model",
+        lambda async_mode: SimpleNamespace(
+            chat=SimpleNamespace(completions=SimpleNamespace(create=create))
+        ),
+    )
+    await model.a_generate("Original objective", schema=arena.InitialAttack)
+    shared["text"] = "Second agent learned that the first approach failed"
+    await model.a_generate("Original objective", schema=arena.InitialAttack)
+    assert "First agent" in calls[0]["messages"][0]["content"]
+    assert "Second agent" in calls[1]["messages"][0]["content"]
+    assert "First agent" not in calls[1]["messages"][0]["content"]
+    assert "private-run-token" not in json.dumps(calls)
+    shared["text"] = "old-marker" + "x" * 5000 + "new-marker"
+    await model.a_generate("Original objective", schema=arena.InitialAttack)
+    assert "old-marker" not in calls[2]["messages"][0]["content"]
+    assert "new-marker" in calls[2]["messages"][0]["content"]
+    assert len(calls[2]["messages"][0]["content"]) < 4500
+    shared["status"] = 503
+    await model.a_generate("Original objective", schema=arena.InitialAttack)
+    assert calls[3]["messages"][0]["content"] == "Original objective"
+
+
+@pytest.mark.asyncio
+async def test_scratchpad_appends_bounded_notes_with_run_authentication(monkeypatch):
+    original_client = httpx.AsyncClient
+    seen = []
+
+    def handle(request):
+        seen.append(request)
+        return httpx.Response(200, json={"text": "updated notes"})
+
+    monkeypatch.setattr(
+        arena.httpx,
+        "AsyncClient",
+        lambda **kwargs: original_client(
+            transport=httpx.MockTransport(handle), **kwargs
+        ),
+    )
+    callback = arena.Callback(url="http://backend:8000/scratchpad", token="run-token")
+    assert await arena.scratchpad_text(callback, "x" * 3000) == "updated notes"
+    assert seen[0].method == "POST"
+    assert seen[0].headers["x-arena-token"] == "run-token"
+    assert json.loads(seen[0].content) == {"text": "x" * 2000}
+    assert await arena.scratchpad_text(None) == ""
+    assert len(seen) == 1
+
+
+@pytest.mark.asyncio
+async def test_generator_shares_plans_and_generated_attacks(monkeypatch):
+    notes = []
+
+    class FakeModel:
+        async def a_generate(self, prompt, schema):
+            assert notes[0].startswith("Starting leetspeak")
+            return schema(input="test"), 0
+
+    async def scratchpad(callback, note=None):
+        assert callback.token == "run-token"
+        if note:
+            notes.append(note)
+        return ""
+
+    monkeypatch.setattr(arena, "model_for", lambda *_: FakeModel())
+    monkeypatch.setattr(arena, "scratchpad_text", scratchpad)
+    request = body("direct")
+    request["scratchpad"] = {
+        "url": "http://backend:8000/scratchpad",
+        "token": "run-token",
+    }
+    result = await arena.generate_one(
+        arena.GenerateRequest.model_validate(request), "leetspeak"
+    )
+    assert result["input"] == "7357"
+    assert notes[-2:] == ["Plan (leetspeak): test", "Generated (leetspeak): 7357"]
+
+
+@pytest.mark.asyncio
 async def test_structured_model_request_retries_transient_errors(monkeypatch):
     from deepeval.config.settings import get_settings as deepeval_settings
 
@@ -365,6 +479,15 @@ def test_multi_turn_stops_after_backend_success(monkeypatch):
     monkeypatch.setattr(arena, "model_for", lambda *_: FakeModel())
     monkeypatch.setitem(arena.MULTI_ATTACKS, "linear_jailbreaking", FakeAttack)
     monkeypatch.setattr(arena.httpx, "AsyncClient", lambda **kwargs: FakeClient())
+    notes = []
+
+    async def scratchpad(callback, note=None):
+        assert callback.token == "shared-run-token"
+        if note:
+            notes.append(note)
+        return ""
+
+    monkeypatch.setattr(arena, "scratchpad_text", scratchpad)
     request = {
         "case_id": "case-1",
         "attack_type": "linear_jailbreaking",
@@ -375,6 +498,10 @@ def test_multi_turn_stops_after_backend_success(monkeypatch):
             "url": "http://backend:8000/api/v1/arena/internal/cases/case-1/turn",
             "token": "callback-secret",
         },
+        "scratchpad": {
+            "url": "http://backend:8000/run/scratchpad",
+            "token": "shared-run-token",
+        },
     }
     response = TestClient(app).post(
         "/internal/arena/multi-turn",
@@ -382,6 +509,9 @@ def test_multi_turn_stops_after_backend_success(monkeypatch):
         headers={"Authorization": "Bearer secret"},
     )
     assert response.status_code == 200
+    assert notes[0].startswith("Starting case-1")
+    assert any("Observed reply: <agent reply>" in note for note in notes)
+    assert notes[-1] == "Finished case-1: 1 turns."
     assert lines(response) == [
         {
             "type": "turn",

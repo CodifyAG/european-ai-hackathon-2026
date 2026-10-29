@@ -408,6 +408,21 @@ as soon as they exist (`R-RED-4`).
   token } }` → NDJSON `{type:"turn", turn, attacker_message, reply}` …, `{type:"done", turns}` / `{type:"error"}`.
   The service calls the backend callback for every turn and stops early when the callback answers `stop: true`.
 
+Both endpoints accept an optional `scratchpad: {url, token}` for a shared red-team scratchpad within one run.
+The backend supplies `/api/v1/arena/internal/runs/{run_id}/scratchpad`: `GET` returns `{text}` and `POST {text}`
+appends a non-blank note of at most 2,000 characters. These direct-only callbacks use the same per-run
+`x-arena-token` as turn callbacks, reject other runs' tokens, and close when the run finishes. Appends are
+serialized with the run's save lock; the latest 16,000 characters are persisted as `red_team_scratchpad` in
+run detail and export, including after completion. No schema migration or shared filesystem is needed.
+
+Red-team attacker and simulator models read the latest 4,000 characters before each model request. Agents
+append their planned/generated attempts and observed replies; the backend appends scored outcomes. Notes
+are shared observations, not instructions, and are never added to green-team or target-agent prompts.
+Maintaining notes makes no extra model calls; a scratchpad HTTP failure is logged and does not abort an
+attack. Parallel agents can see the same snapshot until another agent publishes a note. Notes do not carry
+between runs; single-turn generation shares plans before execution, while multi-turn cases can also learn
+from concurrently completed attempts. Backend and DeepTeam both need deployment to enable this for new runs.
+
 Never hand-written attack content anywhere (SPEC §10): tests use mocked model clients and placeholders like
 `"<attack 1>"`.
 

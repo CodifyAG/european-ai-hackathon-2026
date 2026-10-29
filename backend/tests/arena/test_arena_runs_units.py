@@ -76,10 +76,14 @@ async def test_deepteam_generate_speaks_the_ndjson_contract():
         "http://deepteam:8080/", "gateway-key", transport=httpx.MockTransport(handler)
     )
     resolved = level("email-review")
+    scratchpad = {"url": "http://backend:8000/run/scratchpad", "token": "run-token"}
     cases = [
         case
         async for case in client.generate(
-            resolved, run_id="run-1", attacks=[("prompt_injection", 1)]
+            resolved,
+            run_id="run-1",
+            attacks=[("prompt_injection", 1)],
+            scratchpad=scratchpad,
         )
     ]
     assert cases == [
@@ -92,6 +96,7 @@ async def test_deepteam_generate_speaks_the_ndjson_contract():
     assert seen["auth"] == "Bearer gateway-key"
     body = seen["body"]
     assert body["run_id"] == "run-1" and body["level_id"] == "email-review"
+    assert body["scratchpad"] == scratchpad
     assert body["attacks"] == [{"type": "prompt_injection", "count": 1}]
     assert body["surface"] == {
         "channel": "indirect",
@@ -109,7 +114,16 @@ async def test_deepteam_generate_speaks_the_ndjson_contract():
     assert body["models"]["attacker"] == {
         "model": "glm-5.3-flash-b300",
         "endpoint": "http://localhost:4000/v1",
-        "params": {"temperature": 0.7, "max_tokens": 2048, "extra": {"chat_template_kwargs": {"reasoning_effort": "low", "clear_thinking": True}}},
+        "params": {
+            "temperature": 0.7,
+            "max_tokens": 2048,
+            "extra": {
+                "chat_template_kwargs": {
+                    "reasoning_effort": "low",
+                    "clear_thinking": True,
+                }
+            },
+        },
     }
     assert "gateway-key" not in json.dumps(body)
 
@@ -184,6 +198,7 @@ async def test_deepteam_multi_turn_request():
         attack_type="linear_jailbreaking",
         max_turns=15,
         callback=TurnCallback(url="http://backend:8000/cb", token="tok", call=call),
+        scratchpad={"url": "http://backend:8000/run/scratchpad", "token": "run-token"},
     )
     assert seen["path"] == "/internal/arena/multi-turn"
     body = seen["body"]
@@ -193,6 +208,10 @@ async def test_deepteam_multi_turn_request():
         15,
     )
     assert body["callback"] == {"url": "http://backend:8000/cb", "token": "tok"}
+    assert body["scratchpad"] == {
+        "url": "http://backend:8000/run/scratchpad",
+        "token": "run-token",
+    }
     assert set(body["models"]) == {"attacker", "simulator", "evaluator"}
 
     def failing(request):
@@ -295,7 +314,9 @@ async def test_green_generator_direct_level():
     first = fake.requests[0]
     assert first["temperature"] == 0.9 and first["model"] == "glm-5.3-flash-b300"
     assert first["max_completion_tokens"] == 4096
-    assert first["extra_body"] == {"chat_template_kwargs": {"reasoning_effort": "low", "clear_thinking": True}}
+    assert first["extra_body"] == {
+        "chat_template_kwargs": {"reasoning_effort": "low", "clear_thinking": True}
+    }
     schema = first["response_format"]["json_schema"]["schema"]
     assert schema["properties"]["cases"]["items"]["required"] == ["input"]
     system = first["messages"][0]["content"]

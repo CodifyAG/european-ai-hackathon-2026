@@ -10,7 +10,7 @@ from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from hackathon.api.auth import require_user
 from hackathon.arena.catalog import LevelCatalog, OverrideState, UnknownLevel
@@ -378,3 +378,26 @@ async def internal_turn(
     token: Annotated[str, Header(alias="x-arena-token")] = "",
 ) -> dict[str, Any]:
     return await runs.internal_turn(case_id, token, body.message)
+
+
+class ScratchpadNote(BaseModel):
+    text: str = Field(min_length=1, max_length=2000, pattern=r"\S")
+
+
+@internal_router.get("/runs/{run_id}/scratchpad")
+async def read_scratchpad(
+    run_id: str,
+    runs: Runs,
+    token: Annotated[str, Header(alias="x-arena-token")] = "",
+) -> dict[str, str]:
+    return await runs.scratchpad(run_id, token)
+
+
+@internal_router.post("/runs/{run_id}/scratchpad")
+async def append_scratchpad(
+    run_id: str,
+    body: ScratchpadNote,
+    runs: Runs,
+    token: Annotated[str, Header(alias="x-arena-token")] = "",
+) -> dict[str, str]:
+    return await runs.scratchpad(run_id, token, body.text)

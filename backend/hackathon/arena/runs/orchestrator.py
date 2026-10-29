@@ -54,6 +54,7 @@ from hackathon.arena.runs.store import (
     RunStore,
     case_order,
     now_iso,
+    storable,
 )
 from hackathon.config import get_settings
 
@@ -65,6 +66,7 @@ logger = structlog.get_logger(__name__)
 Team = Literal["red", "green"]
 STOP_TIMEOUT_SECONDS = 10
 MAX_CONCURRENCY = 8
+SCRATCHPAD_MAX_CHARS = 16000
 
 
 class GreenSource(Protocol):
@@ -270,6 +272,7 @@ class Orchestrator:
             "started_at": now_iso(),
             "finished_at": None,
             "error": None,
+            "red_team_scratchpad": "",
             "sources": {
                 "red": {"source": red.source, "dataset_id": red.dataset_id},
                 "green": {"source": green.source, "dataset_id": green.dataset_id},
@@ -553,7 +556,10 @@ class Orchestrator:
             try:
                 sources = [
                     self.red_team.generate(
-                        level, run_id=run["id"], attacks=[(attack_type, 1)]
+                        level,
+                        run_id=run["id"],
+                        attacks=[(attack_type, 1)],
+                        scratchpad=self._scratchpad_callback(active),
                     )
                     for attack_type, attempts in single
                     for _ in range(attempts)
@@ -711,6 +717,14 @@ class Orchestrator:
                 error=f"The case could not run ({type(exc).__name__}).",
             )
         self._apply_result(case, result, time.monotonic() - start)
+        if case["team"] == "red":
+            attempt = case.get("input") or case.get("content") or case.get("messages")
+            await self.scratchpad(
+                active.run["id"],
+                active.token,
+                f"Result {case['id']} ({case['attack_type']}): {result.outcome}; "
+                f"{result.turns} turns. Attempt: {str(attempt)[:1000]}",
+            )
         active.live.pop(case["id"])
         await self._save(active, case)
         active.current.pop(case["id"])
@@ -758,6 +772,7 @@ class Orchestrator:
                 attack_type=case["attack_type"],
                 max_turns=level.surface.max_turns,
                 callback=callback,
+                scratchpad=self._scratchpad_callback(active),
             )
         except RedTeamError as exc:
             error = f"Red-team driver failed: {exc}"
@@ -788,6 +803,29 @@ class Orchestrator:
             result = await target.session.turn(message)
             target.record["turns"] = result.turn
         return {"reply": result.reply, "stop": result.stop}
+
+    def _scratchpad_callback(self, active: ActiveRun) -> dict[str, str]:
+        return {
+            "url": f"{self.callback_base_url}/api/v1/arena/internal/runs/{active.run['id']}/scratchpad",
+            "token": active.token,
+        }
+
+    async def scratchpad(
+        self, run_id: str, token: str, text: str | None = None
+    ) -> dict[str, str]:
+        active = self.active.get(run_id)
+        if active is None or active.run["status"] not in ACTIVE_STATUSES:
+            raise HTTPException(404, "Unknown or finished run")
+        if not hmac.compare_digest(token.encode(), active.token.encode()):
+            raise HTTPException(403, "Invalid arena token")
+        if text is not None:
+            async with active.save_lock:
+                previous = active.run["red_team_scratchpad"]
+                active.run["red_team_scratchpad"] = storable(
+                    f"{previous}\n{text.strip()}".strip()[-SCRATCHPAD_MAX_CHARS:]
+                )
+                await self.store.save_run(active.run)
+        return {"text": active.run["red_team_scratchpad"]}
 
     # --- views -----------------------------------------------------------------------------------------------
 
@@ -847,6 +885,7 @@ class Orchestrator:
             "models": run["models"],
             "datasets": run["datasets"],
             "sources": run["sources"],
+            "red_team_scratchpad": run.get("red_team_scratchpad", ""),
             "cases": [
                 result_views.case_summary(run, case)
                 for case in sorted(cases, key=case_order)

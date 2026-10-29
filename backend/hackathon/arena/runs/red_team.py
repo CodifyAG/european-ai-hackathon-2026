@@ -40,7 +40,12 @@ class TurnCallback:
 
 class RedTeamSource(Protocol):
     def generate(
-        self, level: ResolvedLevel, *, run_id: str, attacks: list[tuple[str, int]]
+        self,
+        level: ResolvedLevel,
+        *,
+        run_id: str,
+        attacks: list[tuple[str, int]],
+        scratchpad: dict[str, str] | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Single-turn cases `{attack_type, input? | content?}` as they are generated; raises `RedTeamError`."""
         ...
@@ -53,6 +58,7 @@ class RedTeamSource(Protocol):
         attack_type: str,
         max_turns: int,
         callback: TurnCallback,
+        scratchpad: dict[str, str] | None = None,
     ) -> None:
         """Run one multi-turn attack through `callback` until done or `stop`; raises `RedTeamError`."""
         ...
@@ -108,7 +114,10 @@ def red_team_models(level: ResolvedLevel) -> dict[str, Any]:
 
 
 def generate_body(
-    level: ResolvedLevel, run_id: str, attacks: list[tuple[str, int]]
+    level: ResolvedLevel,
+    run_id: str,
+    attacks: list[tuple[str, int]],
+    scratchpad: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     surface = level.surface
     injection: dict[str, Any] = {
@@ -127,6 +136,7 @@ def generate_body(
         "objective": level.red_team.objective.model_dump(),
         "surface": {"channel": surface.channel, "injection": injection},
         "models": red_team_models(level),
+        **({"scratchpad": scratchpad} if scratchpad else {}),
     }
 
 
@@ -136,6 +146,7 @@ def multi_turn_body(
     attack_type: str,
     max_turns: int,
     callback: TurnCallback,
+    scratchpad: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     return {
         "case_id": case_id,
@@ -144,6 +155,7 @@ def multi_turn_body(
         "objective": level.red_team.objective.model_dump(),
         "models": red_team_models(level),
         "callback": {"url": callback.url, "token": callback.token},
+        **({"scratchpad": scratchpad} if scratchpad else {}),
     }
 
 
@@ -212,10 +224,16 @@ class DeepTeamClient:
         raise RedTeamError("DeepTeam stream ended without 'done'.")
 
     async def generate(
-        self, level: ResolvedLevel, *, run_id: str, attacks: list[tuple[str, int]]
+        self,
+        level: ResolvedLevel,
+        *,
+        run_id: str,
+        attacks: list[tuple[str, int]],
+        scratchpad: dict[str, str] | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         async for message in self._stream(
-            "/internal/arena/generate", generate_body(level, run_id, attacks)
+            "/internal/arena/generate",
+            generate_body(level, run_id, attacks, scratchpad),
         ):
             if message.get("type") == "case":
                 yield message.get("case")
@@ -228,8 +246,11 @@ class DeepTeamClient:
         attack_type: str,
         max_turns: int,
         callback: TurnCallback,
+        scratchpad: dict[str, str] | None = None,
     ) -> None:
-        body = multi_turn_body(level, case_id, attack_type, max_turns, callback)
+        body = multi_turn_body(
+            level, case_id, attack_type, max_turns, callback, scratchpad
+        )
         async for message in self._stream("/internal/arena/multi-turn", body):
             if message.get("type") == "turn":
                 logger.debug("DeepTeam turn", case_id=case_id, turn=message.get("turn"))
