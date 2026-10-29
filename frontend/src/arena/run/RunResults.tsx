@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { Card as AfterglowCard } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { getRunResults } from "../api";
 import {
@@ -26,6 +27,44 @@ import type {
 import { useArenaQuery } from "../useArenaQuery";
 import { ModelsUsed } from "./RunProgress";
 
+function Card({
+	label,
+	children,
+	caption,
+	testId,
+}: {
+	label: string;
+	children: ReactNode;
+	caption: string;
+	testId?: string;
+}) {
+	return (
+		<AfterglowCard
+			role="region"
+			aria-label={label}
+			data-testid={testId}
+			className="flex flex-col gap-1.5 rounded-none border bg-card p-4 shadow-sm"
+		>
+			<h2 className="text-[13px] text-muted-foreground">{label}</h2>
+			<div className="flex items-baseline gap-2">{children}</div>
+			<p className="text-xs text-muted-foreground">{caption}</p>
+		</AfterglowCard>
+	);
+}
+
+function RateValue({ rate, tone }: { rate: Rate; tone: string }) {
+	return (
+		<>
+			<span className={cn("text-3xl font-semibold tracking-tight", tone)}>
+				{formatPercent(rate)}
+			</span>
+			<span className="font-mono text-sm text-muted-foreground">
+				{rate.numerator} / {rate.denominator}
+			</span>
+		</>
+	);
+}
+
 function Panel({
 	title,
 	aside,
@@ -38,11 +77,13 @@ function Panel({
 	return (
 		<section
 			aria-label={title}
-			className="flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm"
+			className="flex flex-col gap-3 rounded-none border bg-card p-4 shadow-sm"
 		>
 			<div className="flex items-baseline justify-between gap-3">
 				<h2 className="text-sm font-semibold">{title}</h2>
-				{aside && <span className="text-xs text-slate-500">{aside}</span>}
+				{aside && (
+					<span className="text-xs text-muted-foreground">{aside}</span>
+				)}
 			</div>
 			{children}
 		</section>
@@ -61,10 +102,10 @@ function Cell({
 	return (
 		<div
 			className={cn(
-				"flex flex-col items-center justify-center rounded-lg border py-2.5",
+				"flex flex-col items-center justify-center rounded-none border py-2.5",
 				good
-					? "border-emerald-200 bg-emerald-50 text-emerald-800"
-					: "border-red-200 bg-red-50 text-red-700",
+					? "border-arena-defender/30 bg-arena-defender/10 text-arena-defender"
+					: "border-arena-attacker/30 bg-arena-attacker/10 text-arena-attacker",
 			)}
 		>
 			<span className="text-xl font-semibold tabular-nums">{value}</span>
@@ -78,20 +119,20 @@ function Matrix({ matrix }: { matrix: RunResults["matrix"] }) {
 		<Panel title="Expected vs. outcome">
 			<div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 text-[13px]">
 				<span />
-				<span className="text-center text-xs text-slate-500">
+				<span className="text-center text-xs text-muted-foreground">
 					Stopped / blocked
 				</span>
-				<span className="text-center text-xs text-slate-500">
+				<span className="text-center text-xs text-muted-foreground">
 					Got through / passed
 				</span>
-				<span className="pr-2 text-red-600">Red team</span>
+				<span className="pr-2 text-arena-attacker">Red team</span>
 				<Cell value={matrix.red.stopped} caption="correct" good />
 				<Cell
 					value={matrix.red.got_through}
 					caption="false negative"
 					good={false}
 				/>
-				<span className="pr-2 text-emerald-700">Green team</span>
+				<span className="pr-2 text-arena-defender">Green team</span>
 				<Cell
 					value={matrix.green.blocked}
 					caption="false positive"
@@ -285,26 +326,26 @@ function ByAttackType({ rows }: { rows: RunResults["by_attack_type"] }) {
 	return (
 		<Panel title="By attack type" aside="succeeded / attempts">
 			{rows.length === 0 ? (
-				<p className="text-sm text-slate-500">No red cases.</p>
+				<p className="text-sm text-muted-foreground">No red cases.</p>
 			) : (
 				<ul className="flex flex-col gap-3">
 					{rows.map((row) => (
 						<li key={row.type} className="flex flex-col gap-1.5">
 							<span className="flex items-baseline justify-between gap-2 text-[13px]">
 								<span className="font-mono text-xs">{row.type}</span>
-								<span className="font-mono text-xs text-slate-600">
+								<span className="font-mono text-xs text-muted-foreground">
 									{row.succeeded} / {row.attempts}
 									{row.errors > 0 && (
-										<span className="text-slate-400">
+										<span className="text-muted-foreground">
 											{" "}
 											· {row.errors} error{row.errors === 1 ? "" : "s"}
 										</span>
 									)}
 								</span>
 							</span>
-							<span className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+							<span className="h-1.5 overflow-hidden rounded-full bg-muted">
 								<span
-									className="block h-full rounded-full bg-red-500"
+									className="block h-full rounded-full bg-arena-attacker"
 									style={{
 										width: `${row.attempts > 0 ? (row.succeeded / row.attempts) * 100 : 0}%`,
 									}}
@@ -314,6 +355,42 @@ function ByAttackType({ rows }: { rows: RunResults["by_attack_type"] }) {
 					))}
 				</ul>
 			)}
+		</Panel>
+	);
+}
+
+const DECISION_DOTS: Record<string, string> = {
+	guardrail: "bg-arena-defender",
+	agent: "bg-primary",
+	turn_limit: "bg-muted",
+	limit: "bg-muted",
+	success_check: "bg-arena-attacker",
+	error: "bg-muted",
+};
+
+function ByDecision({ rows }: { rows: RunResults["by_decision"] }) {
+	return (
+		<Panel title="Where it was decided" aside="red · green">
+			<ul className="flex flex-col divide-y rounded-none border">
+				{rows.map((row) => (
+					<li
+						key={JSON.stringify(row.decided_by)}
+						className="flex items-center gap-2.5 px-3 py-2 text-[13px]"
+					>
+						<span
+							aria-hidden="true"
+							className={cn(
+								"size-2 shrink-0 rounded-full",
+								DECISION_DOTS[row.decided_by.kind] ?? "bg-muted",
+							)}
+						/>
+						<span className="min-w-0 flex-1">{row.label}</span>
+						<span className="shrink-0 font-mono text-xs text-muted-foreground">
+							{row.red} attack{row.red === 1 ? "" : "s"} · {row.green} benign
+						</span>
+					</li>
+				))}
+			</ul>
 		</Panel>
 	);
 }
@@ -328,13 +405,13 @@ const FILTERS: { id: Filter; label: string; outcome?: CaseOutcome }[] = [
 ];
 
 const FILTER_TONES: Record<Filter, string> = {
-	all: "aria-pressed:border-slate-900 aria-pressed:bg-slate-900 aria-pressed:text-white",
+	all: "aria-pressed:border-border aria-pressed:bg-muted aria-pressed:text-white",
 	false_negative:
-		"text-red-700 aria-pressed:border-red-600 aria-pressed:bg-red-600 aria-pressed:text-white",
+		"text-arena-attacker aria-pressed:border-arena-attacker/30 aria-pressed:bg-arena-attacker aria-pressed:text-white",
 	false_positive:
-		"text-amber-800 aria-pressed:border-amber-500 aria-pressed:bg-amber-500 aria-pressed:text-white",
+		"text-warning aria-pressed:border-warning/30 aria-pressed:bg-warning aria-pressed:text-white",
 	error:
-		"text-slate-600 aria-pressed:border-slate-600 aria-pressed:bg-slate-600 aria-pressed:text-white",
+		"text-muted-foreground aria-pressed:border-border aria-pressed:bg-muted aria-pressed:text-white",
 };
 
 function CaseTable({ runId, cases }: { runId: string; cases: CaseSummary[] }) {
@@ -351,7 +428,7 @@ function CaseTable({ runId, cases }: { runId: string; cases: CaseSummary[] }) {
 	return (
 		<section
 			aria-label="Cases"
-			className="flex flex-col overflow-hidden rounded-xl border bg-white shadow-sm"
+			className="flex flex-col overflow-hidden rounded-none border bg-card shadow-sm"
 		>
 			<div className="flex flex-wrap items-center gap-2 border-b px-4 py-3">
 				<h2 className="mr-1 text-sm font-semibold">Cases</h2>
@@ -366,7 +443,7 @@ function CaseTable({ runId, cases }: { runId: string; cases: CaseSummary[] }) {
 							aria-pressed={filter === f.id}
 							onClick={() => setFilter(f.id)}
 							className={cn(
-								"rounded-full border px-2.5 py-1 text-xs font-medium transition-colors hover:bg-slate-50",
+								"rounded-full border px-2.5 py-1 text-xs font-medium transition-colors hover:bg-card",
 								FILTER_TONES[f.id],
 							)}
 						>
@@ -374,14 +451,14 @@ function CaseTable({ runId, cases }: { runId: string; cases: CaseSummary[] }) {
 						</button>
 					))}
 				</fieldset>
-				<span className="ml-auto text-xs text-slate-500">
+				<span className="ml-auto text-xs text-muted-foreground">
 					Select a row to replay it
 				</span>
 			</div>
 			<div className="overflow-x-auto">
 				<table className="w-full min-w-[46rem] text-[13px]">
 					<thead>
-						<tr className="border-b text-left text-xs text-slate-500">
+						<tr className="border-b text-left text-xs text-muted-foreground">
 							<th className="px-4 py-2 font-medium">#</th>
 							<th className="px-2 py-2 font-medium">Team</th>
 							<th className="px-2 py-2 font-medium">Attack type</th>
@@ -397,14 +474,14 @@ function CaseTable({ runId, cases }: { runId: string; cases: CaseSummary[] }) {
 								key={item.id}
 								data-case={item.label}
 								onClick={() => navigate(href(item))}
-								className="cursor-pointer border-b border-slate-100 last:border-0 hover:bg-slate-50"
+								className="cursor-pointer border-b border-border last:border-0 hover:bg-card"
 							>
 								<td className="px-4 py-2">
 									<a
 										href={href(item)}
 										aria-label={`Replay case ${item.label}`}
 										onClick={(event) => event.stopPropagation()}
-										className="font-mono text-blue-700 hover:underline"
+										className="font-mono text-primary hover:underline"
 									>
 										{item.label}
 									</a>
@@ -412,7 +489,9 @@ function CaseTable({ runId, cases }: { runId: string; cases: CaseSummary[] }) {
 								<td
 									className={cn(
 										"px-2 py-2",
-										item.team === "red" ? "text-red-600" : "text-emerald-700",
+										item.team === "red"
+											? "text-arena-attacker"
+											: "text-arena-defender",
 									)}
 								>
 									{TEAM_LABELS[item.team]}
@@ -424,18 +503,18 @@ function CaseTable({ runId, cases }: { runId: string; cases: CaseSummary[] }) {
 									{item.outcome ? (
 										<OutcomeBadge outcome={item.outcome} />
 									) : (
-										<span className="text-xs text-slate-400">
+										<span className="text-xs text-muted-foreground">
 											{item.status === "stopped" ? "stopped" : "not run"}
 										</span>
 									)}
 								</td>
-								<td className="px-2 py-2 text-slate-700">
+								<td className="px-2 py-2 text-foreground">
 									{decidedLabel(item)}
 									{item.error && (
 										<ExpandableText
 											text={item.error}
 											threshold={60}
-											className="max-w-md text-xs text-red-600"
+											className="max-w-md text-xs text-arena-attacker"
 										/>
 									)}
 								</td>
@@ -451,7 +530,7 @@ function CaseTable({ runId, cases }: { runId: string; cases: CaseSummary[] }) {
 							<tr>
 								<td
 									colSpan={7}
-									className="px-4 py-6 text-center text-slate-500"
+									className="px-4 py-6 text-center text-muted-foreground"
 								>
 									No cases with this outcome.
 								</td>
@@ -486,11 +565,50 @@ export function RunResultsView({ run }: { run: RunDetail }) {
 	return (
 		<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 lg:p-6">
 			{run.status !== "completed" && (
-				<p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+				<p className="rounded-none border border-warning/30 bg-warning/10 px-4 py-2.5 text-sm text-warning">
 					This run {STATUS_LABELS[run.status].toLowerCase()} before all cases
 					were run. The results cover the cases that were completed.
 				</p>
 			)}
+			<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+				<Card
+					label="Attack success rate"
+					caption="red cases that met the success check (errors excluded)"
+					testId="rate-attack-success"
+				>
+					<RateValue rate={rates.attack_success} tone="text-arena-attacker" />
+				</Card>
+				<Card
+					label="False positive rate"
+					caption="benign cases blocked by a guardrail (errors excluded)"
+					testId="rate-false-positive"
+				>
+					<RateValue rate={rates.false_positive} tone="text-warning" />
+				</Card>
+				<Card
+					label="Defended"
+					caption="attacks that did not reach the objective"
+					testId="defended"
+				>
+					<span className="text-3xl font-semibold tracking-tight text-arena-defender">
+						{matrix.red.stopped}
+					</span>
+					<span className="font-mono text-sm text-muted-foreground">
+						/ {rates.attack_success.denominator}
+					</span>
+				</Card>
+				<Card
+					label="Errors"
+					caption={`red ${results.errors.red} · green ${results.errors.green} · excluded from both rates`}
+					testId="errors"
+				>
+					<span className="text-3xl font-semibold tracking-tight">
+						{errorsTotal}
+					</span>
+				</Card>
+			</div>
+			<div className="grid gap-4 lg:grid-cols-3">
+				<Matrix matrix={matrix} />
 			<div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
 				<Matrix matrix={results.matrix} />
 				<OutcomeChart results={results} />

@@ -1,4 +1,3 @@
-import "@xyflow/react/dist/style.css";
 import {
 	Background,
 	BackgroundVariant,
@@ -11,6 +10,7 @@ import {
 } from "@xyflow/react";
 import { MaximizeIcon, MinusIcon, PlusIcon } from "lucide-react";
 import { type CSSProperties, useMemo } from "react";
+import { Screen } from "@/components/screen";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ArenaGraph as ArenaGraphData } from "../types";
@@ -26,18 +26,28 @@ interface EdgeTone {
 
 /** Edge styles by kind (IMPLEMENTATION §4 edge kinds). */
 export const EDGE_TONES: Record<string, EdgeTone> = {
-	attacker: { color: "#e5484d", legend: "attacker-controlled text" },
-	flow: { color: "#94a3b8", legend: "agent flow" },
-	tool_call: { color: "#3b82f6", legend: "tool call / result" },
-	tool_result: { color: "#3b82f6", legend: "tool call / result" },
-	success: { color: "#8b5cf6", dashed: true, legend: "success check" },
+	attacker: {
+		color: "var(--arena-attacker)",
+		legend: "attacker-controlled text",
+	},
+	flow: { color: "var(--phosphor-dim)", legend: "agent flow" },
+	tool_call: { color: "var(--arena-tools)", legend: "tool call / result" },
+	tool_result: { color: "var(--arena-tools)", legend: "tool call / result" },
+	success: {
+		color: "var(--arena-check)",
+		dashed: true,
+		legend: "success check",
+	},
 	reply_loop: {
-		color: "#64748b",
+		color: "var(--phosphor-dim)",
 		dashed: true,
 		legend: "next turn (reply loop)",
 	},
 };
-const FALLBACK_TONE: EdgeTone = { color: "#94a3b8", legend: "other" };
+const FALLBACK_TONE: EdgeTone = {
+	color: "var(--phosphor-dim)",
+	legend: "other",
+};
 
 function styleEdge(edge: FlowEdge, highlight?: GraphHighlight): FlowEdge {
 	const kind = edge.data?.kind ?? "flow";
@@ -69,12 +79,15 @@ function styleEdge(edge: FlowEdge, highlight?: GraphHighlight): FlowEdge {
 				? { offset: 56, borderRadius: 10 }
 				: { borderRadius: 10 },
 		labelStyle: {
-			fill: kind === "attacker" ? "#c2410c" : "#475569",
+			fill:
+				kind === "attacker"
+					? "var(--arena-attacker)"
+					: "var(--muted-foreground)",
 			fontSize: 11,
 		},
-		labelBgStyle: { fill: "#ffffff", fillOpacity: 0.92 },
+		labelBgStyle: { fill: "var(--card)", fillOpacity: 0.92 },
 		labelBgPadding: [6, 3],
-		labelBgBorderRadius: 999,
+		labelBgBorderRadius: 0,
 		className: cn(`arena-edge-${kind}`),
 	} as FlowEdge;
 }
@@ -127,7 +140,7 @@ export function GraphLegend({ graph }: { graph: ArenaGraphData }) {
 	return (
 		<ul
 			aria-label="Legend"
-			className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-slate-500"
+			className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-muted-foreground"
 		>
 			{entries.map((tone) => (
 				<li key={tone.legend} className="flex items-center gap-2">
@@ -202,12 +215,18 @@ export function ArenaGraph({
 	return (
 		<GraphContext.Provider value={context}>
 			<ReactFlowProvider>
-				<div
-					className={cn("relative h-full w-full", className)}
+				<Screen
+					density="soft"
+					className={cn(
+						"guardrail-arena relative h-full w-full border-0",
+						className,
+					)}
 					data-testid="arena-graph"
 					data-channel={graph.surface.channel}
 				>
 					<ReactFlow
+						className="arena-flow"
+						colorMode="dark"
 						key={layoutKey}
 						nodes={flow.nodes}
 						edges={edges}
@@ -225,11 +244,11 @@ export function ArenaGraph({
 							variant={BackgroundVariant.Dots}
 							gap={20}
 							size={1.2}
-							color="#cbd5e1"
+							color="var(--border)"
 						/>
 						<ZoomControls fitViewOptions={fitViewOptions} />
 					</ReactFlow>
-				</div>
+				</Screen>
 			</ReactFlowProvider>
 		</GraphContext.Provider>
 	);

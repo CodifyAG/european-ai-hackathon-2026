@@ -186,7 +186,7 @@ export function LevelView({
 			actions={
 				<>
 					{detail && (
-						<span className="hidden text-[13px] text-slate-500 xl:inline">
+						<span className="hidden text-[13px] text-muted-foreground xl:inline">
 							{teamSummary(detail)}
 						</span>
 					)}
@@ -236,12 +236,12 @@ export function LevelView({
 						aria-label="Execution graph"
 						className="flex min-h-0 shrink-0 flex-col"
 					>
-						<div className="flex h-12 shrink-0 items-center gap-3 border-b bg-white px-4">
+						<div className="flex h-12 shrink-0 items-center gap-3 border-b bg-card px-4">
 							<h2 className="text-sm font-semibold">Execution graph</h2>
 							{surface && (
 								<SurfaceBadge channel={surface.channel} turns={surface.turns} />
 							)}
-							<span className="hidden truncate text-xs text-slate-500 sm:inline">
+							<span className="hidden truncate text-xs text-muted-foreground sm:inline">
 								{surface?.channel === "indirect"
 									? "attacker never sees a reply"
 									: "rendered from level.yaml"}
@@ -255,16 +255,16 @@ export function LevelView({
 								onSelect={select}
 							/>
 						</div>
-						<div className="shrink-0 border-t bg-white px-4 py-2.5">
+						<div className="shrink-0 border-t bg-card px-4 py-2.5">
 							<GraphLegend graph={graph} />
 						</div>
 					</section>
 
 					<aside
 						aria-label="Inspector"
-						className="flex min-h-0 shrink-0 flex-col border-t bg-slate-50/60 lg:border-t-0 lg:border-l"
+						className="flex min-h-0 shrink-0 flex-col border-t bg-card/60 lg:border-t-0 lg:border-l"
 					>
-						<div className="flex h-12 shrink-0 items-center border-b bg-white px-4 text-[13px] text-slate-500">
+						<div className="flex h-12 shrink-0 items-center border-b bg-card px-4 text-[13px] text-muted-foreground">
 							Inspector
 						</div>
 						<div className="min-h-0 flex-1 overflow-y-auto">

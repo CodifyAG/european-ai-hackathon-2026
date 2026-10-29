@@ -1,5 +1,7 @@
 import { AlertTriangleIcon, CheckIcon, Loader2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Led } from "@/components/led";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { getLevel } from "../api";
 import { ExpandableText, OutcomeBadge } from "../components";
@@ -34,15 +36,19 @@ function ProgressCard({
 }) {
 	const pct = progress.total > 0 ? (progress.done / progress.total) * 100 : 0;
 	return (
-		<section
+		<Card
+			accent={
+				tone === "red" ? "var(--arena-attacker)" : "var(--arena-defender)"
+			}
+			role="region"
 			aria-label={`${title} progress`}
-			className="flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm"
+			className="flex flex-col gap-3 rounded-none border bg-card p-4 shadow-sm"
 		>
 			<div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
 				<h2
 					className={cn(
 						"text-xs font-semibold tracking-[0.08em] uppercase",
-						tone === "red" ? "text-red-600" : "text-emerald-700",
+						tone === "red" ? "text-arena-attacker" : "text-arena-defender",
 					)}
 				>
 					{title}
@@ -50,7 +56,7 @@ function ProgressCard({
 				<span className="text-2xl font-semibold tracking-tight tabular-nums">
 					{progress.done}
 				</span>
-				<span className="text-sm text-slate-500">
+				<span className="text-sm text-muted-foreground">
 					/ {progress.total} {unit}
 				</span>
 			</div>
@@ -60,31 +66,31 @@ function ProgressCard({
 				aria-valuemin={0}
 				aria-valuemax={progress.total}
 				aria-valuenow={progress.done}
-				className="h-2 overflow-hidden rounded-full bg-slate-100"
+				className="h-2 overflow-hidden rounded-full bg-muted"
 			>
 				<div
 					className={cn(
 						"h-full rounded-full transition-[width]",
-						tone === "red" ? "bg-red-500" : "bg-emerald-500",
+						tone === "red" ? "bg-arena-attacker" : "bg-arena-defender",
 					)}
 					style={{ width: `${pct}%` }}
 				/>
 			</div>
-			<dl className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-slate-600">
+			<dl className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-muted-foreground">
 				{stats.map((stat) => (
 					<div key={stat.label} className="flex items-center gap-1.5">
 						<span
 							aria-hidden="true"
-							className={cn("size-2 rounded-sm", stat.dot)}
+							className={cn("size-2 rounded-none", stat.dot)}
 						/>
 						<dt>{stat.label}</dt>
-						<dd className="font-semibold text-slate-900 tabular-nums">
+						<dd className="font-semibold text-foreground tabular-nums">
 							{stat.value}
 						</dd>
 					</div>
 				))}
 			</dl>
-		</section>
+		</Card>
 	);
 }
 
@@ -92,19 +98,19 @@ function caseStatus(item: CaseSummary, liveId: string | undefined) {
 	if (item.outcome) return <OutcomeBadge outcome={item.outcome} />;
 	if (item.status === "stopped")
 		return (
-			<span className="inline-flex h-5 items-center rounded-md border border-amber-200 bg-amber-50 px-1.5 text-[11px] text-amber-800">
+			<span className="inline-flex h-5 items-center rounded-none border border-warning/30 bg-warning/10 px-1.5 text-[11px] text-warning">
 				Stopped
 			</span>
 		);
 	if (item.id === liveId || item.status === "running")
 		return (
-			<span className="inline-flex h-5 items-center gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-1.5 text-[11px] font-semibold text-blue-700">
-				<span className="size-1.5 animate-pulse rounded-full bg-blue-500" />
+			<span className="inline-flex h-5 items-center gap-1.5 rounded-none border border-primary/30 bg-primary/10 px-1.5 text-[11px] font-semibold text-primary">
+				<Led tone="busy" pulse aria-hidden="true" />
 				Running{item.turns > 0 ? ` · turn ${item.turns}` : ""}
 			</span>
 		);
 	return (
-		<span className="inline-flex h-5 items-center rounded-md border px-1.5 text-[11px] text-slate-500">
+		<span className="inline-flex h-5 items-center rounded-none border px-1.5 text-[11px] text-muted-foreground">
 			Queued
 		</span>
 	);
@@ -191,16 +197,16 @@ function CaseQueue({ run }: { run: RunDetail }) {
 	return (
 		<section
 			aria-label="Generated cases"
-			className="flex min-h-0 flex-col overflow-hidden rounded-xl border bg-white shadow-sm"
+			className="flex min-h-0 flex-col overflow-hidden rounded-none border bg-card shadow-sm"
 		>
 			<div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b px-4">
 				<h2 className="text-sm font-semibold">Cases</h2>
-				<span className="truncate text-xs text-slate-500">
+				<span className="truncate text-xs text-muted-foreground">
 					{run.cases.length} generated · inputs for a sanity check
 				</span>
 			</div>
 			{run.cases.length === 0 ? (
-				<p className="p-4 text-sm text-slate-500">
+				<p className="p-4 text-sm text-muted-foreground">
 					{run.status === "generating"
 						? "Generating cases… they appear here as soon as they exist."
 						: "No cases yet."}
@@ -348,12 +354,12 @@ function LiveSample({ run }: { run: RunDetail }) {
 	return (
 		<section
 			aria-label="Live sample"
-			className="flex min-h-[28rem] flex-col overflow-hidden rounded-xl border bg-white shadow-sm"
+			className="flex min-h-[28rem] flex-col overflow-hidden rounded-none border bg-card shadow-sm"
 		>
 			<div className="flex h-12 shrink-0 items-center gap-3 border-b px-4">
 				<h2 className="text-sm font-semibold">Live sample</h2>
 				{item && (
-					<span className="truncate text-xs text-slate-500">
+					<span className="truncate text-xs text-muted-foreground">
 						Case {item.label}
 						{item.attack_type ? ` · ${item.attack_type}` : ""}
 						{lastTurn
@@ -363,7 +369,7 @@ function LiveSample({ run }: { run: RunDetail }) {
 				)}
 			</div>
 			{!live ? (
-				<p className="flex flex-1 items-center justify-center p-6 text-sm text-slate-500">
+				<p className="flex flex-1 items-center justify-center p-6 text-sm text-muted-foreground">
 					No case is running right now.
 				</p>
 			) : (
@@ -372,12 +378,14 @@ function LiveSample({ run }: { run: RunDetail }) {
 						{graph ? (
 							<ArenaGraph graph={graph} highlight={highlight} />
 						) : (
-							<p className="p-4 text-sm text-slate-500">Loading graph…</p>
+							<p className="p-4 text-sm text-muted-foreground">
+								Loading graph…
+							</p>
 						)}
 					</div>
 					<div className="min-h-0 overflow-y-auto border-t xl:w-[17rem] xl:shrink-0 xl:border-t-0 xl:border-l">
 						{events.length > shown.length && (
-							<p className="border-b border-slate-100 px-4 py-1.5 text-center text-xs text-slate-500">
+							<p className="border-b border-border px-4 py-1.5 text-center text-xs text-muted-foreground">
 								{events.length - shown.length} earlier events
 							</p>
 						)}
@@ -402,10 +410,10 @@ function LiveSample({ run }: { run: RunDetail }) {
 export function ModelsUsed({ run }: { run: RunDetail }) {
 	if (!run.models.length) return null;
 	return (
-		<details className="group rounded-xl border bg-white shadow-sm">
+		<details className="group rounded-none border bg-card shadow-sm">
 			<summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm font-semibold">
 				Models used
-				<span className="text-xs font-normal text-slate-500">
+				<span className="text-xs font-normal text-muted-foreground">
 					{run.models.length} roles · recorded with the run
 				</span>
 			</summary>
@@ -419,15 +427,12 @@ export function ModelsUsed({ run }: { run: RunDetail }) {
 				</thead>
 				<tbody>
 					{run.models.map((m) => (
-						<tr
-							key={m.role}
-							className="border-b border-slate-100 last:border-0"
-						>
-							<td className="px-4 py-2 font-mono text-xs text-slate-600">
+						<tr key={m.role} className="border-b border-border last:border-0">
+							<td className="px-4 py-2 font-mono text-xs text-muted-foreground">
 								{m.role}
 							</td>
 							<td className="px-2 py-2 font-mono text-xs">{m.model}</td>
-							<td className="px-4 py-2 font-mono text-xs text-slate-500">
+							<td className="px-4 py-2 font-mono text-xs text-muted-foreground">
 								{formatParams(m.params)}
 							</td>
 						</tr>
@@ -453,12 +458,12 @@ export function RunProgress({ run }: { run: RunDetail }) {
 						{
 							label: "Attack succeeded",
 							value: counts.succeeded,
-							dot: "bg-red-500",
+							dot: "bg-arena-attacker",
 						},
 						{
 							label: "Defended",
 							value: counts.defended,
-							dot: "bg-emerald-500",
+							dot: "bg-arena-defender",
 						},
 					]}
 				/>
@@ -468,19 +473,19 @@ export function RunProgress({ run }: { run: RunDetail }) {
 					tone="green"
 					progress={progress.green}
 					stats={[
-						{ label: "Passed", value: counts.passed, dot: "bg-emerald-500" },
+						{ label: "Passed", value: counts.passed, dot: "bg-arena-defender" },
 						{
 							label: "False positive",
 							value: counts.false_positive,
-							dot: "bg-amber-500",
+							dot: "bg-warning",
 						},
 					]}
 				/>
 				<section
 					aria-label="Errors"
-					className="flex flex-col justify-between gap-1 rounded-xl border bg-white p-4 shadow-sm md:min-w-40"
+					className="flex flex-col justify-between gap-1 rounded-none border bg-card p-4 shadow-sm md:min-w-40"
 				>
-					<h2 className="text-xs font-semibold tracking-[0.08em] text-slate-500 uppercase">
+					<h2 className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
 						Errors
 					</h2>
 					<span
@@ -489,7 +494,9 @@ export function RunProgress({ run }: { run: RunDetail }) {
 					>
 						{counts.error}
 					</span>
-					<span className="text-xs text-slate-500">excluded from rates</span>
+					<span className="text-xs text-muted-foreground">
+						excluded from rates
+					</span>
 				</section>
 			</div>
 			<div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">

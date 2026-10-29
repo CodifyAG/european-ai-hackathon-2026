@@ -1,5 +1,6 @@
 import { DownloadIcon, PlayIcon, SquareIcon } from "lucide-react";
 import { useState } from "react";
+import { Led } from "@/components/led";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,15 @@ import { RunProgress } from "./RunProgress";
 import { RunResultsView } from "./RunResults";
 import { isActiveRun, useRunPolling } from "./useRunPolling";
 
+const STATUS_TONES: Record<RunDetail["status"], string> = {
+	generating: "border-primary/30 bg-primary/10 text-primary",
+	running: "border-arena-defender/30 bg-arena-defender/10 text-arena-defender",
+	completed: "border-border bg-card text-foreground",
+	stopped: "border-warning/30 bg-warning/10 text-warning",
+	failed: "border-arena-attacker/30 bg-arena-attacker/10 text-arena-attacker",
+	interrupted: "border-warning/30 bg-warning/10 text-warning",
+};
+
 function StatusPill({ run }: { run: RunDetail }) {
 	const active = isActiveRun(run);
 	return (
@@ -31,12 +41,19 @@ function StatusPill({ run }: { run: RunDetail }) {
 				RUN_STATUS_TONES[run.status],
 			)}
 		>
-			{active && (
-				<span
-					aria-hidden="true"
-					className="size-1.5 animate-pulse rounded-full bg-current"
-				/>
-			)}
+			<Led
+				tone={
+					active
+						? "busy"
+						: run.status === "failed"
+							? "error"
+							: run.status === "completed"
+								? "ok"
+								: "idle"
+				}
+				pulse={active}
+				aria-hidden="true"
+			/>
 			{STATUS_LABELS[run.status]}
 			{!active && ` · ${run.cases.length} cases`}
 			<span className="font-mono tabular-nums">
@@ -59,7 +76,10 @@ function StopButton({
 	return (
 		<>
 			{error && (
-				<span role="alert" className="max-w-72 text-xs text-red-600">
+				<span
+					role="alert"
+					className="max-w-72 text-xs text-arena-attacker"
+				>
 					<ExpandableText text={error} threshold={40} />
 				</span>
 			)}
@@ -67,7 +87,7 @@ function StopButton({
 				type="button"
 				size="sm"
 				variant="outline"
-				className="border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
+				className="border-arena-attacker/30 text-arena-attacker hover:bg-arena-attacker/10 hover:text-arena-attacker"
 				disabled={stopping}
 				onClick={async () => {
 					setStopping(true);
@@ -145,7 +165,7 @@ function RunNotices({ run }: { run: RunDetail }) {
 		<div
 			role="alert"
 			aria-label="Run problems"
-			className="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800"
+			className="border-b border-arena-attacker/30 bg-arena-attacker/10 px-4 py-2 text-sm text-arena-attacker"
 		>
 			{notices.map((notice) => (
 				<p key={notice}>{notice}</p>
@@ -221,7 +241,7 @@ export function RunPage({ runId }: { runId: string }) {
 			{run && error && active && (
 				<p
 					role="alert"
-					className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900"
+					className="border-b border-warning/30 bg-warning/10 px-4 py-2 text-sm text-warning"
 				>
 					Live updates are failing ({error.message}). Retrying…
 				</p>

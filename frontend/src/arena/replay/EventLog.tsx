@@ -6,15 +6,15 @@ import type { ArenaGraph, CaseEvent, Team } from "../types";
 import { type EventTone, eventHeading, guardrailData } from "./events";
 
 const TONE_TEXT: Record<EventTone, string> = {
-	attacker: "text-red-600",
-	user: "text-sky-700",
-	"guardrail-ok": "text-emerald-700",
-	"guardrail-block": "text-amber-700",
-	tool: "text-blue-600",
-	agent: "text-blue-700",
-	success: "text-emerald-700",
-	fail: "text-red-600",
-	muted: "text-slate-500",
+	attacker: "text-arena-attacker",
+	user: "text-arena-agent",
+	"guardrail-ok": "text-arena-defender",
+	"guardrail-block": "text-warning",
+	tool: "text-arena-tools",
+	agent: "text-arena-agent",
+	success: "text-arena-defender",
+	fail: "text-arena-attacker",
+	muted: "text-muted-foreground",
 };
 
 const LONG_TEXT = 320;
@@ -36,11 +36,11 @@ function TextBox({
 	return (
 		<div
 			className={cn(
-				"rounded-lg border px-3 py-2 text-[13px] leading-relaxed break-words whitespace-pre-wrap",
+				"rounded-none border px-3 py-2 text-[13px] leading-relaxed break-words whitespace-pre-wrap",
 				mono && "font-mono text-xs",
-				tone === "attacker" && "border-red-100 bg-red-50/50",
-				tone === "agent" && "border-blue-100 bg-blue-50/50",
-				tone === "plain" && "border-slate-200 bg-slate-50",
+				tone === "attacker" && "border-arena-attacker/30 bg-arena-attacker/10",
+				tone === "agent" && "border-primary/30 bg-primary/10",
+				tone === "plain" && "border-border bg-card",
 			)}
 		>
 			{children}
@@ -68,7 +68,7 @@ export function CollapsibleText({ text }: { text: string }) {
 						event.stopPropagation();
 						setOpen((o) => !o);
 					}}
-					className="text-xs font-medium text-blue-600 hover:underline"
+					className="text-xs font-medium text-primary hover:underline"
 				>
 					{open ? "Show less" : `Show full result (${text.length} chars)`}
 				</button>
@@ -83,8 +83,8 @@ function Fields({ rows }: { rows: [string, ReactNode][] }) {
 		<dl className="grid grid-cols-[max-content_minmax(0,1fr)] gap-x-3 gap-y-0.5 text-[13px]">
 			{rows.map(([label, value]) => (
 				<div key={label} className="contents">
-					<dt className="text-slate-500">{label}</dt>
-					<dd className="break-words whitespace-pre-wrap text-slate-800">
+					<dt className="text-muted-foreground">{label}</dt>
+					<dd className="break-words whitespace-pre-wrap text-foreground">
 						{value}
 					</dd>
 				</div>
@@ -120,7 +120,7 @@ function EventBody({ event }: { event: CaseEvent }) {
 				<div className="flex flex-col gap-2">
 					{Object.entries(data).map(([field, value]) => (
 						<div key={field} className="flex flex-col gap-1">
-							<span className="text-xs text-slate-500">{field}</span>
+							<span className="text-xs text-muted-foreground">{field}</span>
 							<TextBox tone="attacker">{asText(value)}</TextBox>
 						</div>
 					))}
@@ -184,7 +184,7 @@ function EventBody({ event }: { event: CaseEvent }) {
 		case "tool_result":
 			return (
 				<div className="flex flex-col gap-1">
-					<span className="font-mono text-xs text-slate-500">
+					<span className="font-mono text-xs text-muted-foreground">
 						{asText(data.tool)}
 					</span>
 					{data.result !== undefined && (
@@ -284,7 +284,7 @@ export function EventEntry({
 		<>
 			<span
 				title={formatDateTime(event.at, { seconds: true })}
-				className="font-mono text-xs text-slate-500 tabular-nums"
+				className="font-mono text-xs text-muted-foreground tabular-nums"
 			>
 				{formatEventTime(event.t)}
 			</span>
@@ -303,12 +303,12 @@ export function EventEntry({
 			aria-current={current ? "step" : undefined}
 			onClick={onSelect ?? (expandable ? () => setOpen((o) => !o) : undefined)}
 			className={cn(
-				"grid grid-cols-[4rem_minmax(0,1fr)] gap-x-3 border-b border-slate-100 px-4 transition-colors",
+				"grid grid-cols-[4rem_minmax(0,1fr)] gap-x-3 border-b border-border px-4 transition-colors",
 				compact ? "gap-y-0.5 py-2" : "gap-y-1.5 py-3",
-				(onSelect || expandable) && "cursor-pointer hover:bg-slate-50",
+				(onSelect || expandable) && "cursor-pointer hover:bg-card",
 				current &&
-					"bg-blue-50/70 shadow-[inset_3px_0_0_#3b82f6] hover:bg-blue-50/70",
-				heading.tone === "fail" && !current && "bg-red-50/40",
+					"bg-primary/10 shadow-[inset_3px_0_0_var(--phosphor)] hover:bg-primary/10",
+				heading.tone === "fail" && !current && "bg-arena-attacker/10",
 			)}
 		>
 			{onSelect ? (
@@ -319,7 +319,7 @@ export function EventEntry({
 						onSelect();
 					}}
 					aria-label={`${formatEventTime(event.t)} ${heading.title}`}
-					className="col-span-2 grid grid-cols-subgrid items-baseline text-left focus-visible:outline-2 focus-visible:outline-blue-500"
+					className="col-span-2 grid grid-cols-subgrid items-baseline text-left focus-visible:outline-2 focus-visible:outline-primary"
 				>
 					{header}
 				</button>
@@ -333,7 +333,7 @@ export function EventEntry({
 					text={summary}
 					open={open}
 					onOpenChange={setOpen}
-					className="col-start-2 text-xs text-slate-600"
+					className="col-start-2 text-xs text-muted-foreground"
 				/>
 			) : (
 				<div className="col-start-2 flex min-w-0 flex-col gap-1.5">
@@ -410,7 +410,7 @@ function EventGroup({
 			{turn !== null && (
 				<li
 					data-turn={turn}
-					className="border-b border-slate-100 bg-slate-50 px-4 py-1 text-[11px] font-semibold tracking-[0.08em] text-slate-500 uppercase"
+					className="border-b border-border bg-card px-4 py-1 text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase"
 				>
 					Turn {turn}
 				</li>

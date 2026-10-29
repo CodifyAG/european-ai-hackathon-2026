@@ -54,6 +54,34 @@ describe("ArenaGraph", () => {
 			expect(within(tools).getByText(tool)).toBeInTheDocument();
 	});
 
+	it("keeps role accents stable and pulses only current nodes", () => {
+		const { rerender } = render(<ArenaGraph graph={hiddenMailboxHard.graph} />);
+		const attacker = () => flowNode("attacker")!;
+		expect(attacker().querySelector('[data-slot="card"]')).toHaveStyle({
+			"--card-accent": "var(--arena-attacker)",
+		});
+		expect(attacker().querySelector('[data-slot="led"]')).not.toHaveClass(
+			"animate-led",
+		);
+		rerender(
+			<ArenaGraph
+				graph={hiddenMailboxHard.graph}
+				highlight={{ nodes: { attacker: "current" } }}
+			/>,
+		);
+		expect(attacker().querySelector('[data-slot="card"]')).toHaveStyle({
+			"--card-accent": "var(--arena-attacker)",
+		});
+		expect(attacker().querySelector('[data-slot="led"]')).toHaveClass(
+			"animate-led",
+		);
+		expect(attacker()).toHaveTextContent("Running");
+		expect(document.querySelector('[data-slot="scanlines"]')).toHaveClass(
+			"pointer-events-none",
+			"scanlines-soft",
+		);
+	});
+
 	it("places a guardrail in the group of its position and moves it with the config (AC-2)", () => {
 		const level = cloneLevel(hiddenMailboxHard);
 		const { rerender } = render(<ArenaGraph graph={level.graph} />);
@@ -157,9 +185,11 @@ describe("ArenaGraph", () => {
 		);
 		expect(judge).toHaveAttribute("data-highlight", "current");
 		expect(screen.getByText("SAFE · passed")).toBeInTheDocument();
-		expect(document.querySelector('[data-node-id="agent"]')).toHaveClass(
-			"opacity-45",
-		);
+		expect(
+			document
+				.querySelector('[data-node-id="agent"]')
+				?.closest('[data-slot="card"]'),
+		).toHaveClass("opacity-45");
 	});
 });
 

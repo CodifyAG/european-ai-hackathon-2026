@@ -12,6 +12,7 @@
 		"test:auth": "node --test auth-server/*.test.mjs"
 	},
 	"dependencies": {
+		"@base-ui/react": "^1.9.0",
 		"@tailwindcss/vite": "^4.3.3",
 		"@xyflow/react": "^12.12.0",
 		"better-auth": "^1.7.7",

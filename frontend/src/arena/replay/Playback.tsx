@@ -72,16 +72,17 @@ export function usePlayback(events: CaseEvent[]): Playback {
 function markerTone(event: CaseEvent) {
 	if (event.kind === "guardrail")
 		return guardrailData(event).status === "blocked"
-			? "bg-amber-500"
-			: "bg-emerald-500";
+			? "bg-warning"
+			: "bg-arena-defender";
 	if (event.kind === "success_check")
-		return event.data.met ? "bg-red-500" : "bg-violet-500";
+		return event.data.met ? "bg-arena-attacker" : "bg-arena-check";
 	if (event.kind === "attacker_message" || event.kind === "injection")
-		return "bg-red-400";
+		return "bg-arena-attacker";
 	if (event.kind === "tool_call" || event.kind === "tool_result")
-		return "bg-blue-500";
-	if (event.kind === "error" || event.kind === "limit") return "bg-red-600";
-	return "bg-slate-400";
+		return "bg-primary";
+	if (event.kind === "error" || event.kind === "limit")
+		return "bg-arena-attacker";
+	return "bg-muted";
 }
 
 export function PlaybackBar({
@@ -108,7 +109,7 @@ export function PlaybackBar({
 	return (
 		<section
 			aria-label="Playback"
-			className="flex shrink-0 flex-wrap items-center gap-3 border-t bg-white px-4 py-3"
+			className="flex shrink-0 flex-wrap items-center gap-3 border-t bg-card px-4 py-3"
 		>
 			<div className="flex items-center gap-1.5">
 				<Button
@@ -154,7 +155,7 @@ export function PlaybackBar({
 					value={now}
 					disabled={empty}
 					onChange={(e) => scrub(Number(e.target.value))}
-					className="w-full accent-blue-600"
+					className="w-full accent-primary"
 				/>
 				<div className="pointer-events-none absolute inset-x-[7px] top-0 h-1.5">
 					{events.map((event, i) => (
@@ -169,7 +170,7 @@ export function PlaybackBar({
 							className={cn(
 								"pointer-events-auto absolute top-0 size-1.5 -translate-x-1/2 rounded-full",
 								markerTone(event),
-								i === index && "ring-2 ring-blue-500 ring-offset-1",
+								i === index && "ring-2 ring-primary ring-offset-1",
 							)}
 						/>
 					))}
@@ -177,7 +178,7 @@ export function PlaybackBar({
 			</div>
 
 			<span
-				className="font-mono text-xs text-slate-600 tabular-nums"
+				className="font-mono text-xs text-muted-foreground tabular-nums"
 				data-testid="replay-time"
 			>
 				{formatEventTime(now)} / {formatEventTime(total)}
@@ -185,7 +186,7 @@ export function PlaybackBar({
 
 			<fieldset
 				aria-label="Speed"
-				className="m-0 flex min-w-0 items-center gap-0.5 rounded-md border bg-slate-50 p-0.5"
+				className="m-0 flex min-w-0 items-center gap-0.5 rounded-none border bg-card p-0.5"
 			>
 				{SPEEDS.map((s) => (
 					<button
@@ -194,8 +195,8 @@ export function PlaybackBar({
 						aria-pressed={speed === s}
 						onClick={() => playback.setSpeed(s)}
 						className={cn(
-							"rounded px-1.5 py-0.5 font-mono text-[11px] text-slate-500",
-							speed === s && "bg-white text-slate-900 shadow-sm",
+							"rounded px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground",
+							speed === s && "bg-card text-foreground shadow-sm",
 						)}
 					>
 						{s}×

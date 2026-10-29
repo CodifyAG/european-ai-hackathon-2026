@@ -9,14 +9,10 @@ import {
 	OutcomeBadge,
 	runCrumbs,
 } from "../components";
-import { formatDateTime, formatDuration } from "../format";
+import { formatDuration } from "../format";
 import { ArenaGraph } from "../graph/ArenaGraph";
 import { arenaHref } from "../router";
-import {
-	ACTIVE_RUN_STATUSES,
-	type CaseDetail,
-	type CaseSummary,
-} from "../types";
+import type { CaseDetail, CaseSummary } from "../types";
 import { useArenaQuery } from "../useArenaQuery";
 import { EventLog } from "./EventLog";
 import { highlightAt } from "./events";
@@ -48,7 +44,7 @@ function CaseNav({
 	const link = (item: CaseSummary | undefined, dir: "prev" | "next") => {
 		const label = dir === "prev" ? "Previous case" : "Next case";
 		const className =
-			"inline-flex h-8 items-center gap-1 rounded-md border bg-white px-2.5 text-[13px] font-medium text-slate-700 shadow-xs";
+			"inline-flex h-8 items-center gap-1 rounded-none border bg-card px-2.5 text-[13px] font-medium text-foreground shadow-xs";
 		const content = (
 			<>
 				{dir === "prev" && (
@@ -64,7 +60,7 @@ function CaseNav({
 			<a
 				href={arenaHref({ name: "case", runId, caseId: item.id })}
 				aria-label={`${label}: ${item.label}`}
-				className={cn(className, "hover:bg-slate-50")}
+				className={cn(className, "hover:bg-card")}
 			>
 				{content}
 			</a>
@@ -95,7 +91,7 @@ function CaseInput({ detail }: { detail: CaseDetail }) {
 			{fields.map(([name, value]) => (
 				<div key={name} className="flex flex-col gap-1">
 					<dt className="text-xs">{name}</dt>
-					<dd className="rounded-lg border bg-slate-50 px-3 py-2 break-words whitespace-pre-wrap text-slate-800">
+					<dd className="rounded-none border bg-card px-3 py-2 break-words whitespace-pre-wrap text-foreground">
 						{value}
 					</dd>
 				</div>
@@ -151,11 +147,11 @@ function ReplayBody({ detail }: { detail: CaseDetail }) {
 			</section>
 			<aside
 				aria-label="Events"
-				className="flex min-h-0 flex-col border-t bg-white lg:border-t-0 lg:border-l"
+				className="flex min-h-0 flex-col border-t bg-card lg:border-t-0 lg:border-l"
 			>
 				<div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b px-4">
 					<h2 className="text-sm font-semibold">Event log</h2>
-					<span className="text-xs text-slate-500">
+					<span className="text-xs text-muted-foreground">
 						{events.length} event{events.length === 1 ? "" : "s"} · recorded
 						during the run · ←/→ step, space plays
 					</span>
@@ -163,7 +159,7 @@ function ReplayBody({ detail }: { detail: CaseDetail }) {
 				{detail.error && (
 					<p
 						role="note"
-						className="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800"
+						className="border-b border-arena-attacker/30 bg-arena-attacker/10 px-4 py-2 text-sm text-arena-attacker"
 					>
 						{detail.error}
 					</p>
@@ -178,7 +174,7 @@ function ReplayBody({ detail }: { detail: CaseDetail }) {
 							onSelect={playback.seek}
 						/>
 					) : (
-						<div className="flex flex-col gap-3 p-4 text-sm text-slate-500">
+						<div className="flex flex-col gap-3 p-4 text-sm text-muted-foreground">
 							<p>No events were recorded for this case.</p>
 							<CaseInput detail={detail} />
 						</div>
@@ -210,29 +206,11 @@ export function CaseReplay({
 				...runCrumbs(run.data, runId),
 				{ label: `Case ${data?.label ?? caseId}` },
 			]}
-			back={{
-				href: arenaHref({ name: "run", runId }),
-				label:
-					run.data && ACTIVE_RUN_STATUSES.includes(run.data.status)
-						? "Back to the run"
-						: "Back to the results",
-			}}
 			center={
 				data && (
-					<div className="flex max-w-[min(34rem,42vw)] min-w-0 items-center gap-2.5 text-[13px] text-slate-600 max-lg:max-w-full">
+					<div className="flex min-w-0 items-center gap-2.5 text-[13px] text-muted-foreground">
 						{data.outcome && <OutcomeBadge outcome={data.outcome} />}
 						<span className="truncate">{caseFacts(data)}</span>
-						{data.started_at && (
-							<span className="shrink-0 whitespace-nowrap">
-								· started{" "}
-								<time
-									dateTime={data.started_at}
-									className="font-medium text-slate-900 tabular-nums"
-								>
-									{formatDateTime(data.started_at, { seconds: true })}
-								</time>
-							</span>
-						)}
 					</div>
 				)
 			}

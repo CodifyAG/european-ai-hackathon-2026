@@ -19,6 +19,8 @@ import {
 	WrenchIcon,
 } from "lucide-react";
 import { memo, type ReactNode } from "react";
+import { Led } from "@/components/led";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { GraphNode } from "../types";
 import { type NodeHighlight, useGraphContext } from "./context";
@@ -69,75 +71,76 @@ function Handles() {
 interface Tone {
 	kicker: string;
 	icon: LucideIcon;
-	card: string;
+
+	accent: string;
 	kickerText: string;
 	iconBox: string;
 }
 
 const TONES: Record<Exclude<FlowNodeType, "guardrails" | "tools">, Tone> = {
 	attacker: {
+		accent: "var(--arena-attacker)",
 		kicker: "Red team",
 		icon: CrosshairIcon,
-		card: "border-red-200 bg-white",
-		kickerText: "text-red-600",
-		iconBox: "bg-red-50 text-red-600",
+		kickerText: "text-arena-attacker",
+		iconBox: "bg-arena-attacker/10 text-arena-attacker",
 	},
 	injection: {
+		accent: "var(--arena-attacker)",
 		kicker: "Injection point",
 		icon: MailWarningIcon,
-		card: "border-amber-300 bg-amber-50/60",
-		kickerText: "text-amber-700",
-		iconBox: "bg-amber-100 text-amber-700",
+		kickerText: "text-warning",
+		iconBox: "bg-warning/10 text-warning",
 	},
 	user_task: {
+		accent: "var(--arena-agent)",
 		kicker: "User task · fixed",
 		icon: MessageSquareQuoteIcon,
-		card: "border-slate-200 bg-white",
-		kickerText: "text-slate-500",
-		iconBox: "bg-slate-100 text-slate-600",
+		kickerText: "text-muted-foreground",
+		iconBox: "bg-muted text-muted-foreground",
 	},
 	agent: {
+		accent: "var(--arena-agent)",
 		kicker: "Agent",
 		icon: BotIcon,
-		card: "border-blue-200 bg-white",
-		kickerText: "text-blue-600",
-		iconBox: "bg-blue-50 text-blue-600",
+		kickerText: "text-arena-agent",
+		iconBox: "bg-arena-agent/10 text-arena-agent",
 	},
 	data: {
+		accent: "var(--arena-data)",
 		kicker: "Data",
 		icon: DatabaseIcon,
-		card: "border-amber-200 bg-amber-50/40",
-		kickerText: "text-amber-700",
-		iconBox: "bg-amber-100 text-amber-700",
+		kickerText: "text-warning",
+		iconBox: "bg-warning/10 text-warning",
 	},
 	success: {
+		accent: "var(--arena-check)",
 		kicker: "Success check",
 		icon: CircleCheckIcon,
-		card: "border-dashed border-violet-300 bg-violet-50/50",
-		kickerText: "text-violet-600",
-		iconBox: "bg-violet-100 text-violet-600",
+		kickerText: "text-arena-check",
+		iconBox: "bg-arena-check/10 text-arena-check",
 	},
 	output: {
+		accent: "var(--arena-agent)",
 		kicker: "Output",
 		icon: ReplyIcon,
-		card: "border-slate-200 bg-white",
-		kickerText: "text-slate-500",
-		iconBox: "bg-slate-100 text-slate-600",
+		kickerText: "text-muted-foreground",
+		iconBox: "bg-muted text-muted-foreground",
 	},
 	generic: {
+		accent: "var(--arena-tools)",
 		kicker: "Node",
 		icon: BoxIcon,
-		card: "border-slate-200 bg-white",
-		kickerText: "text-slate-500",
-		iconBox: "bg-slate-100 text-slate-600",
+		kickerText: "text-muted-foreground",
+		iconBox: "bg-muted text-muted-foreground",
 	},
 };
 
 const HIGHLIGHT_CLASSES: Record<NodeHighlight, string> = {
-	visited: "border-blue-400",
-	current: "ring-2 ring-blue-500 shadow-lg shadow-blue-500/20",
-	blocked: "ring-2 ring-amber-500",
-	alert: "ring-2 ring-red-500 shadow-lg shadow-red-500/20",
+	visited: "border-primary/30",
+	current: "ring-2 ring-primary shadow-lg shadow-primary/20",
+	blocked: "ring-2 ring-warning",
+	alert: "ring-2 ring-arena-attacker shadow-lg shadow-arena-attacker/20",
 };
 
 function useNodeState(id: string) {
@@ -164,12 +167,67 @@ function stateClasses({
 	return cn(
 		highlight && HIGHLIGHT_CLASSES[highlight],
 		dimmed && "opacity-45",
-		selected && "outline-2 outline-offset-2 outline-blue-500",
+		selected && "outline-2 outline-offset-2 outline-ring",
+	);
+}
+
+function ArenaNodeFrame({
+	accent,
+	state,
+	children,
+}: {
+	accent: string;
+	state: ReturnType<typeof useNodeState>;
+	children: ReactNode;
+}) {
+	return (
+		<div className="arena-node relative h-full w-full">
+			<Handles />
+			<Card
+				accent={accent}
+				className={cn("arena-node-card h-full gap-0 py-0", stateClasses(state))}
+			>
+				{children}
+			</Card>
+		</div>
+	);
+}
+
+function NodeStatus({ state }: { state: ReturnType<typeof useNodeState> }) {
+	const tone =
+		state.highlight === "current"
+			? "busy"
+			: state.highlight === "alert"
+				? "error"
+				: state.highlight === "blocked"
+					? "busy"
+					: state.highlight === "visited"
+						? "ok"
+						: "idle";
+	const label =
+		state.highlight === "current"
+			? "Running"
+			: state.highlight === "visited"
+				? "Complete"
+				: state.highlight === "alert"
+					? "Alert"
+					: state.highlight === "blocked"
+						? "Blocked"
+						: "Idle";
+	return (
+		<span className="flex items-center gap-1.5 text-[9px] uppercase text-muted-foreground">
+			<Led
+				tone={tone}
+				pulse={state.highlight === "current"}
+				aria-hidden="true"
+			/>
+			{label}
+		</span>
 	);
 }
 
 const cardBase =
-	"nodrag nopan relative flex h-full w-full flex-col rounded-xl border text-left shadow-sm transition-[box-shadow,opacity,border-color] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500";
+	"nodrag nopan relative flex h-full w-full flex-col text-left focus-visible:outline-2 focus-visible:outline-ring";
 const kickerBase = "text-[10px] font-semibold uppercase tracking-[0.12em]";
 
 // Simple nodes ---------------------------------------------------------------
@@ -187,58 +245,61 @@ function SimpleNode({
 	const Icon = tone.icon;
 	const state = useNodeState(node.id);
 	return (
-		<button
-			type="button"
-			onClick={state.select}
-			aria-pressed={state.selected}
-			aria-label={`${tone.kicker}: ${node.label}`}
-			data-node-id={node.id}
-			data-highlight={state.highlight ?? undefined}
-			className={cn(
-				cardBase,
-				"gap-2 px-3.5 py-3",
-				tone.card,
-				stateClasses(state),
-			)}
-		>
-			<Handles />
-			<span className="flex min-w-0 items-start gap-2.5">
-				<span
-					className={cn(
-						"mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg",
-						tone.iconBox,
-					)}
-				>
-					<Icon className="size-4" aria-hidden="true" />
-				</span>
-				<span className="min-w-0 flex-1">
-					<span className={cn(kickerBase, "block", tone.kickerText)}>
-						{tone.kicker}
-					</span>
+		<ArenaNodeFrame accent={tone.accent} state={state}>
+			<button
+				type="button"
+				onClick={state.select}
+				aria-pressed={state.selected}
+				aria-label={`${tone.kicker}: ${node.label}`}
+				data-node-id={node.id}
+				data-highlight={state.highlight ?? undefined}
+				className={cn(cardBase, "gap-2 px-3.5 py-3")}
+			>
+				<span className="flex min-w-0 items-start gap-2.5">
 					<span
 						className={cn(
-							"block font-semibold leading-snug text-slate-900",
-							type === "user_task"
-								? "line-clamp-2 text-[13px]"
-								: "truncate text-sm",
+							"mt-0.5 grid size-7 shrink-0 place-items-center rounded-none",
+							tone.iconBox,
 						)}
 					>
-						{type === "user_task" ? `“${node.label}”` : node.label}
+						<Icon className="size-4" aria-hidden="true" />
 					</span>
+					<span className="min-w-0 flex-1">
+						<span
+							className={cn(
+								kickerBase,
+								"flex items-center justify-between gap-2",
+								tone.kickerText,
+							)}
+						>
+							{tone.kicker}
+							<NodeStatus state={state} />
+						</span>
+						<span
+							className={cn(
+								"block font-semibold leading-snug text-foreground",
+								type === "user_task"
+									? "line-clamp-2 text-[13px]"
+									: "truncate text-sm",
+							)}
+						>
+							{type === "user_task" ? `“${node.label}”` : node.label}
+						</span>
+					</span>
+					{state.annotation && (
+						<span className="shrink-0 font-mono text-[11px] text-muted-foreground">
+							{state.annotation}
+						</span>
+					)}
 				</span>
-				{state.annotation && (
-					<span className="shrink-0 font-mono text-[11px] text-slate-500">
-						{state.annotation}
+				{children}
+				{node.subtitle && (
+					<span className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+						{node.subtitle}
 					</span>
 				)}
-			</span>
-			{children}
-			{node.subtitle && (
-				<span className="line-clamp-2 text-xs leading-snug text-slate-500">
-					{node.subtitle}
-				</span>
-			)}
-		</button>
+			</button>
+		</ArenaNodeFrame>
 	);
 }
 
@@ -264,12 +325,12 @@ const AgentNode = memo(function AgentNode({ data }: NodeProps<FlowNode>) {
 		<SimpleNode node={{ ...data.node, subtitle: null }} type="agent">
 			<span className="flex min-w-0 flex-wrap items-center gap-1.5">
 				{model && (
-					<span className="truncate font-mono text-[11px] text-slate-600">
+					<span className="truncate font-mono text-[11px] text-muted-foreground">
 						{model}
 					</span>
 				)}
 				{data.node.subtitle && data.node.subtitle !== model && (
-					<span className="truncate rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[11px] text-slate-600">
+					<span className="truncate rounded-none border border-border bg-card px-1.5 py-0.5 text-[11px] text-muted-foreground">
 						{data.node.subtitle}
 					</span>
 				)}
@@ -304,15 +365,15 @@ function MemberRow({
 				data-node-id={member.id}
 				data-highlight={state.highlight ?? undefined}
 				className={cn(
-					"nodrag nopan flex w-full items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 text-left text-[13px] text-slate-800 transition-colors hover:border-slate-300 focus-visible:outline-2 focus-visible:outline-blue-500",
+					"nodrag nopan flex w-full items-center gap-2 rounded-none border border-border bg-card px-2.5 text-left text-[13px] text-foreground transition-colors hover:border-border focus-visible:outline-2 focus-visible:outline-primary",
 					mono ? "h-[30px] font-mono text-xs" : "h-9",
-					state.selected && "border-blue-500 bg-blue-50/70 text-blue-900",
+					state.selected && "border-primary/30 bg-primary/10 text-primary",
 					stateClasses({ ...state, selected: false }),
 				)}
 			>
 				{Icon && (
 					<Icon
-						className="size-3.5 shrink-0 text-slate-500"
+						className="size-3.5 shrink-0 text-muted-foreground"
 						aria-hidden="true"
 					/>
 				)}
@@ -322,8 +383,8 @@ function MemberRow({
 						className={cn(
 							"shrink-0 text-[10.5px]",
 							state.annotation
-								? "font-mono text-slate-600"
-								: "font-medium text-slate-400",
+								? "font-mono text-muted-foreground"
+								: "font-medium text-muted-foreground",
 						)}
 					>
 						{state.annotation ?? tag}
@@ -356,32 +417,37 @@ function GroupNode({
 	// A group is part of the visited path as soon as one of its members is.
 	const memberVisited = members.some((m) => highlight?.nodes?.[m.id]);
 	return (
-		<div
-			data-node-id={node.id}
-			data-highlight={state.highlight ?? undefined}
-			className={cn(
-				"relative flex h-full w-full flex-col rounded-xl border px-2.5 pb-2.5 shadow-sm transition-[box-shadow,opacity]",
-				className,
-				stateClasses({ ...state, dimmed: state.dimmed && !memberVisited }),
-			)}
+		<ArenaNodeFrame
+			accent={
+				kicker === "Guardrails" ? "var(--arena-defender)" : "var(--arena-tools)"
+			}
+			state={{ ...state, dimmed: state.dimmed && !memberVisited }}
 		>
-			<Handles />
-			<button
-				type="button"
-				onClick={state.select}
-				aria-pressed={state.selected}
-				aria-label={`${kicker}${aside ? ` ${aside}` : ""}`}
-				className="nodrag nopan flex h-10 shrink-0 items-center justify-between gap-2 px-1 text-left focus-visible:outline-2 focus-visible:outline-blue-500"
-			>
-				<span className={cn(kickerBase, kickerClass)}>{kicker}</span>
-				{aside && (
-					<span className="truncate font-mono text-[11px] text-slate-500">
-						{aside}
-					</span>
+			<div
+				data-node-id={node.id}
+				data-highlight={state.highlight ?? undefined}
+				className={cn(
+					"relative flex h-full w-full flex-col px-2.5 pb-2.5",
+					className,
 				)}
-			</button>
-			{children}
-		</div>
+			>
+				<button
+					type="button"
+					onClick={state.select}
+					aria-pressed={state.selected}
+					aria-label={`${kicker}${aside ? ` ${aside}` : ""}`}
+					className="nodrag nopan flex h-10 shrink-0 items-center justify-between gap-2 px-1 text-left focus-visible:outline-2 focus-visible:outline-primary"
+				>
+					<span className={cn(kickerBase, kickerClass)}>{kicker}</span>
+					{aside && (
+						<span className="truncate font-mono text-[11px] text-muted-foreground">
+							{aside}
+						</span>
+					)}
+				</button>
+				{children}
+			</div>
+		</ArenaNodeFrame>
 	);
 }
 
@@ -395,8 +461,8 @@ const GuardrailsNode = memo(function GuardrailsNode({
 			members={data.members}
 			kicker="Guardrails"
 			aside={formatPosition(position)}
-			className="border-emerald-200 bg-emerald-50/60"
-			kickerClass="text-emerald-700"
+			className=""
+			kickerClass="text-arena-defender"
 		>
 			<ul
 				className="flex flex-col gap-1.5"
@@ -422,8 +488,8 @@ const ToolsNode = memo(function ToolsNode({ data }: NodeProps<FlowNode>) {
 			members={data.members}
 			kicker="Tools"
 			aside={data.node.subtitle}
-			className="border-slate-200 bg-slate-50/80"
-			kickerClass="text-slate-500"
+			className="border-border bg-card/80"
+			kickerClass="text-arena-tools"
 		>
 			<ul className="flex flex-col gap-1" aria-label="Tools">
 				{data.members.map((member) => (

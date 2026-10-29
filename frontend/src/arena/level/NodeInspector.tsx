@@ -32,59 +32,59 @@ const KIND_INFO: Record<
 	attacker: {
 		label: "Red team",
 		icon: CrosshairIcon,
-		tone: "bg-red-50 text-red-600",
+		tone: "bg-arena-attacker/10 text-arena-attacker",
 	},
 	injection: {
 		label: "Attack surface · indirect",
 		icon: MailWarningIcon,
-		tone: "bg-amber-100 text-amber-700",
+		tone: "bg-warning/10 text-warning",
 	},
 	user_task: {
 		label: "Fixed user task",
 		icon: MessageSquareQuoteIcon,
-		tone: "bg-slate-100 text-slate-600",
+		tone: "bg-muted text-muted-foreground",
 	},
 	guardrails: {
 		label: "Guardrail position",
 		icon: LayersIcon,
-		tone: "bg-emerald-50 text-emerald-700",
+		tone: "bg-arena-defender/10 text-arena-defender",
 	},
 	guardrail: {
 		label: "Guardrail",
 		icon: ShieldCheckIcon,
-		tone: "bg-emerald-50 text-emerald-700",
+		tone: "bg-arena-defender/10 text-arena-defender",
 	},
-	agent: { label: "Agent", icon: BotIcon, tone: "bg-blue-50 text-blue-600" },
+	agent: { label: "Agent", icon: BotIcon, tone: "bg-primary/10 text-primary" },
 	tools: {
 		label: "Tools",
 		icon: WrenchIcon,
-		tone: "bg-slate-100 text-slate-600",
+		tone: "bg-muted text-muted-foreground",
 	},
 	tool: {
 		label: "Tool",
 		icon: WrenchIcon,
-		tone: "bg-slate-100 text-slate-600",
+		tone: "bg-muted text-muted-foreground",
 	},
 	data: {
 		label: "Data",
 		icon: DatabaseIcon,
-		tone: "bg-amber-100 text-amber-700",
+		tone: "bg-warning/10 text-warning",
 	},
 	success: {
 		label: "Success check",
 		icon: CircleCheckIcon,
-		tone: "bg-violet-100 text-violet-600",
+		tone: "bg-arena-check/10 text-arena-check",
 	},
 	output: {
 		label: "Output",
 		icon: ReplyIcon,
-		tone: "bg-slate-100 text-slate-600",
+		tone: "bg-muted text-muted-foreground",
 	},
 };
 const UNKNOWN_INFO = {
 	label: "Node",
 	icon: BoxIcon,
-	tone: "bg-slate-100 text-slate-600",
+	tone: "bg-muted text-muted-foreground",
 };
 
 const formatValue = (value: unknown) =>
@@ -93,15 +93,15 @@ const formatValue = (value: unknown) =>
 function SettingsTable({ rows }: { rows: { label: string; value: string }[] }) {
 	if (!rows.length) return null;
 	return (
-		<dl className="divide-y overflow-hidden rounded-lg border bg-white text-[13px]">
+		<dl className="divide-y overflow-hidden rounded-none border bg-card text-[13px]">
 			{rows.map((row, i) => (
 				<div
 					// biome-ignore lint/suspicious/noArrayIndexKey: labels may repeat.
 					key={`${row.label}-${i}`}
 					className="grid grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-3 px-3 py-2"
 				>
-					<dt className="text-slate-500">{row.label}</dt>
-					<dd className="text-right font-medium break-words text-slate-800">
+					<dt className="text-muted-foreground">{row.label}</dt>
+					<dd className="text-right font-medium break-words text-foreground">
 						{row.value}
 					</dd>
 				</div>
@@ -122,31 +122,31 @@ function ModelCard({ role, spec }: { role?: string; spec: ModelSpec }) {
 		([, value]) => value !== undefined && value !== null,
 	);
 	return (
-		<div className="overflow-hidden rounded-lg border bg-white text-[13px]">
+		<div className="overflow-hidden rounded-none border bg-card text-[13px]">
 			{role && (
-				<p className="border-b bg-slate-50 px-3 py-1.5 text-[11px] font-medium tracking-wide text-slate-500 uppercase">
+				<p className="border-b bg-card px-3 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
 					{roleLabel(role)}
 				</p>
 			)}
 			<dl className="divide-y">
 				<div className="flex justify-between gap-3 px-3 py-2">
-					<dt className="text-slate-500">Model</dt>
-					<dd className="font-mono text-xs font-medium text-slate-800">
+					<dt className="text-muted-foreground">Model</dt>
+					<dd className="font-mono text-xs font-medium text-foreground">
 						{spec.model}
 					</dd>
 				</div>
 				{spec.endpoint && (
 					<div className="flex justify-between gap-3 px-3 py-2">
-						<dt className="text-slate-500">Endpoint</dt>
-						<dd className="font-mono text-xs text-slate-700">
+						<dt className="text-muted-foreground">Endpoint</dt>
+						<dd className="font-mono text-xs text-foreground">
 							{spec.endpoint}
 						</dd>
 					</div>
 				)}
 				{params.map(([key, value]) => (
 					<div key={key} className="flex justify-between gap-3 px-3 py-2">
-						<dt className="font-mono text-xs text-slate-500">{key}</dt>
-						<dd className="font-mono text-xs text-slate-700">
+						<dt className="font-mono text-xs text-muted-foreground">{key}</dt>
+						<dd className="font-mono text-xs text-foreground">
 							{formatValue(value)}
 						</dd>
 					</div>
@@ -169,7 +169,7 @@ function PromptBlock({
 	return (
 		<div className="flex flex-col gap-1.5">
 			<div className="flex items-baseline justify-between gap-2">
-				<p className="text-[13px] font-semibold text-slate-800">
+				<p className="text-[13px] font-semibold text-foreground">
 					{prompt.name}
 				</p>
 				{prompt.file &&
@@ -177,13 +177,13 @@ function PromptBlock({
 						<button
 							type="button"
 							onClick={() => onOpenFile(prompt.file!)}
-							className="truncate font-mono text-[11px] text-slate-500 hover:text-blue-600 hover:underline"
+							className="truncate font-mono text-[11px] text-muted-foreground hover:text-primary hover:underline"
 							title={`Open ${prompt.file} in the config source`}
 						>
 							{prompt.file}
 						</button>
 					) : (
-						<span className="truncate font-mono text-[11px] text-slate-500">
+						<span className="truncate font-mono text-[11px] text-muted-foreground">
 							{prompt.file}
 						</span>
 					))}
@@ -191,7 +191,7 @@ function PromptBlock({
 			<pre
 				id={id}
 				className={cn(
-					"relative overflow-hidden rounded-lg border bg-slate-50 px-3 py-2 font-mono text-[11.5px] leading-[18px] whitespace-pre-wrap text-slate-700",
+					"relative overflow-hidden rounded-none border bg-card px-3 py-2 font-mono text-[11.5px] leading-[18px] whitespace-pre-wrap text-foreground",
 					!open && long && "max-h-[5.6rem]",
 				)}
 			>
@@ -206,7 +206,7 @@ function PromptBlock({
 					aria-expanded={open}
 					aria-controls={id}
 					onClick={() => setOpen((v) => !v)}
-					className="flex items-center gap-1 self-start text-[12.5px] font-medium text-blue-600 hover:underline"
+					className="flex items-center gap-1 self-start text-[12.5px] font-medium text-primary hover:underline"
 				>
 					{open ? "Hide full prompt" : "Show full prompt"}
 					<ChevronDownIcon
@@ -231,7 +231,7 @@ function Section({
 }) {
 	return (
 		<section className="flex flex-col gap-2">
-			<h3 className="text-[13px] font-semibold text-slate-800">{title}</h3>
+			<h3 className="text-[13px] font-semibold text-foreground">{title}</h3>
 			{children}
 		</section>
 	);
@@ -251,11 +251,11 @@ function NodeLinks({
 					<button
 						type="button"
 						onClick={() => onSelect?.(node.id)}
-						className="flex w-full items-start gap-2 rounded-md px-1 py-1 text-left text-[13px] hover:bg-slate-100"
+						className="flex w-full items-start gap-2 rounded-none px-1 py-1 text-left text-[13px] hover:bg-muted"
 					>
-						<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-emerald-500" />
-						<span className="text-slate-700">
-							<span className="font-medium text-slate-900">{node.label}</span>
+						<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-arena-defender" />
+						<span className="text-foreground">
+							<span className="font-medium text-foreground">{node.label}</span>
 							{node.subtitle && <span> — {node.subtitle}</span>}
 						</span>
 					</button>
@@ -280,7 +280,7 @@ export function NodeInspector({
 }) {
 	if (!node)
 		return (
-			<p className="p-4 text-sm text-slate-500">
+			<p className="p-4 text-sm text-muted-foreground">
 				Select a node in the graph to see its settings and prompts.
 			</p>
 		);
@@ -315,17 +315,17 @@ export function NodeInspector({
 			<div className="flex items-start gap-3">
 				<span
 					className={cn(
-						"grid size-9 shrink-0 place-items-center rounded-lg",
+						"grid size-9 shrink-0 place-items-center rounded-none",
 						info.tone,
 					)}
 				>
 					<Icon className="size-4.5" aria-hidden="true" />
 				</span>
 				<div className="min-w-0">
-					<h2 className="text-base leading-tight font-semibold text-slate-900">
+					<h2 className="text-base leading-tight font-semibold text-foreground">
 						{kind === "user_task" ? `“${node.label}”` : node.label}
 					</h2>
-					<p className="mt-0.5 text-[13px] text-slate-500">{kindText}</p>
+					<p className="mt-0.5 text-[13px] text-muted-foreground">{kindText}</p>
 				</div>
 			</div>
 
@@ -370,7 +370,7 @@ export function NodeInspector({
 					{siblings.length ? (
 						<NodeLinks nodes={siblings} onSelect={onSelect} />
 					) : (
-						<p className="text-[13px] text-slate-500">
+						<p className="text-[13px] text-muted-foreground">
 							No other {isGuardrailGroup ? "guardrails" : "members"} here.
 						</p>
 					)}

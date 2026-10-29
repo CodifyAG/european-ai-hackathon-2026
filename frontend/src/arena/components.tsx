@@ -52,7 +52,7 @@ export function DifficultySwitch({
 	return (
 		<nav
 			aria-label="Difficulty"
-			className="flex items-center gap-0.5 rounded-lg border bg-slate-100/80 p-0.5"
+			className="flex items-center gap-0.5 rounded-none border bg-muted/80 p-0.5"
 		>
 			{DIFFICULTIES.filter((d) => available.includes(d)).map((difficulty) => (
 				<a
@@ -60,8 +60,8 @@ export function DifficultySwitch({
 					href={hrefFor(difficulty)}
 					aria-current={difficulty === value ? "page" : undefined}
 					className={cn(
-						"rounded-md px-3.5 py-1.5 text-[13px] font-medium text-slate-500 transition-colors hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-blue-500",
-						difficulty === value && "bg-white text-slate-900 shadow-sm",
+						"rounded-none px-3.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary",
+						difficulty === value && "bg-card text-foreground shadow-sm",
 					)}
 				>
 					{DIFFICULTY_LABELS[difficulty]}
@@ -77,14 +77,14 @@ function UserMenu() {
 	return (
 		<div className="flex shrink-0 items-center gap-2 border-l pl-3">
 			{session?.user.name && (
-				<span className="hidden max-w-40 truncate text-[13px] text-slate-600 md:inline">
+				<span className="hidden max-w-40 truncate text-[13px] text-muted-foreground md:inline">
 					{session.user.name}
 				</span>
 			)}
 			<button
 				type="button"
 				onClick={() => void authClient.signOut()}
-				className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-blue-500"
+				className="flex items-center gap-1.5 rounded-none px-2 py-1 text-[13px] text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
 			>
 				<LogOutIcon className="size-3.5" aria-hidden="true" />
 				<span className="sr-only sm:not-sr-only">Sign out</span>
@@ -109,8 +109,8 @@ export function ArenaShell({
 	children: ReactNode;
 }) {
 	return (
-		<div className="flex h-dvh w-full flex-col bg-slate-50 text-slate-900">
-			<header className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 border-b bg-white px-4 py-2.5 lg:h-14 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:py-0">
+		<div className="flex h-dvh w-full flex-col bg-card text-foreground">
+			<header className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 border-b bg-card px-4 py-2.5 lg:h-14 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:py-0">
 				<div className="flex min-w-0 items-center gap-3">
 					{back && (
 						<a
@@ -125,9 +125,9 @@ export function ArenaShell({
 					)}
 					<a
 						href={arenaHref({ name: "levels" })}
-						className="flex shrink-0 items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-blue-500"
+						className="flex shrink-0 items-center gap-2.5 rounded-none focus-visible:outline-2 focus-visible:outline-primary"
 					>
-						<span className="grid size-7 place-items-center rounded-lg bg-blue-600 text-white">
+						<span className="grid size-7 place-items-center rounded-none bg-primary text-primary-foreground">
 							<ShieldIcon className="size-4" aria-hidden="true" />
 						</span>
 						{/* Sub-pages need the room for "Back" and the breadcrumb; the logo stays. */}
@@ -144,14 +144,14 @@ export function ArenaShell({
 						<ol className="flex min-w-0 items-center gap-2 text-[13px]">
 							{crumbs.map((crumb) => (
 								<Fragment key={crumb.href ?? crumb.label}>
-									<li aria-hidden="true" className="text-slate-300">
+									<li aria-hidden="true" className="text-muted-foreground">
 										/
 									</li>
 									<li className="min-w-0 truncate">
 										{crumb.href ? (
 											<a
 												href={crumb.href}
-												className="text-slate-500 hover:text-slate-900"
+												className="text-muted-foreground hover:text-foreground"
 											>
 												{crumb.label}
 											</a>
@@ -198,8 +198,8 @@ export function SurfaceBadge({
 			className={cn(
 				"inline-flex h-6 items-center rounded-full border px-2.5 text-xs font-medium whitespace-nowrap",
 				channel === "direct"
-					? "border-red-200 bg-red-50 text-red-700"
-					: "border-amber-200 bg-amber-50 text-amber-800",
+					? "border-arena-attacker/30 bg-arena-attacker/10 text-arena-attacker"
+					: "border-warning/30 bg-warning/10 text-warning",
 				className,
 			)}
 		>
@@ -210,7 +210,7 @@ export function SurfaceBadge({
 
 export function LoadingState({ label }: { label: string }) {
 	return (
-		<div className="flex flex-1 items-center justify-center gap-2 p-10 text-sm text-slate-500">
+		<div className="flex flex-1 items-center justify-center gap-2 p-10 text-sm text-muted-foreground">
 			<Spinner className="size-4" aria-hidden="true" />
 			{label}
 		</div>
@@ -230,14 +230,11 @@ export function ErrorState({
 		<div className="flex flex-1 items-center justify-center p-10">
 			<div
 				role="alert"
-				className="flex max-w-md flex-col items-center gap-3 rounded-xl border bg-white p-6 text-center shadow-sm"
+				className="flex max-w-md flex-col items-center gap-3 rounded-none border bg-card p-6 text-center shadow-sm"
 			>
-				<AlertTriangleIcon
-					className="size-6 text-amber-500"
-					aria-hidden="true"
-				/>
+				<AlertTriangleIcon className="size-6 text-warning" aria-hidden="true" />
 				<p className="font-medium">{title}</p>
-				<p className="text-sm text-slate-500">{error.message}</p>
+				<p className="text-sm text-muted-foreground">{error.message}</p>
 				{onRetry && (
 					<Button type="button" variant="outline" size="sm" onClick={onRetry}>
 						Try again
@@ -279,11 +276,12 @@ export function RunStatusBadge({ status }: { status: RunStatus }) {
 }
 
 const OUTCOME_TONES: Record<CaseOutcome, string> = {
-	succeeded: "border-red-200 bg-red-50 text-red-700",
-	defended: "border-emerald-200 bg-emerald-50 text-emerald-700",
-	passed: "border-emerald-200 bg-emerald-50 text-emerald-700",
-	false_positive: "border-amber-200 bg-amber-50 text-amber-800",
-	error: "border-slate-200 bg-slate-100 text-slate-600",
+	succeeded:
+		"border-arena-attacker/30 bg-arena-attacker/10 text-arena-attacker",
+	defended: "border-arena-defender/30 bg-arena-defender/10 text-arena-defender",
+	passed: "border-arena-defender/30 bg-arena-defender/10 text-arena-defender",
+	false_positive: "border-warning/30 bg-warning/10 text-warning",
+	error: "border-signal/30 bg-signal/10 text-signal",
 };
 
 /** Outcome of a decided case, e.g. "Attack succeeded" or "False positive". */
@@ -298,7 +296,7 @@ export function OutcomeBadge({
 		<span
 			data-outcome={outcome}
 			className={cn(
-				"inline-flex h-5 items-center rounded-md border px-1.5 text-[11px] font-semibold whitespace-nowrap",
+				"inline-flex h-5 items-center rounded-none border px-1.5 text-[11px] font-semibold whitespace-nowrap",
 				OUTCOME_TONES[outcome],
 				className,
 			)}
