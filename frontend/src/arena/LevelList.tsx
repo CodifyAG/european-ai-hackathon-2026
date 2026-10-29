@@ -9,7 +9,6 @@ import {
 	SurfaceBadge,
 } from "./components";
 import { arenaHref } from "./router";
-import { RunHistory } from "./run/RunHistory";
 import { RunList } from "./run/RunList";
 import type { LevelSummary } from "./types";
 import { useArenaQuery } from "./useArenaQuery";
@@ -125,20 +124,19 @@ export function LevelList() {
 						<div className="flex flex-col gap-1">
 							<h2
 								id="runs-heading"
-								className="text-base font-semibold tracking-tight"
+								className="font-mono text-xs font-semibold uppercase tracking-widest text-phosphor-bright"
 							>
 								Runs
 							</h2>
-							<p className="text-sm text-slate-600">
+							<p className="text-sm text-muted-foreground">
 								Running evaluations first, then finished ones, newest first.
 								Open a run to watch it live or see its results.
 							</p>
 						</div>
-						<div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+						<Card accent={false} className="gap-0 overflow-hidden py-0">
 							<RunList levelTitles={levelTitles} />
-						</div>
+						</Card>
 					</section>
-					<RunHistory levels={query.data ?? []} />
 				</div>
 			</div>
 		</ArenaShell>

@@ -280,7 +280,7 @@ export function LevelView({
 						</div>
 						<section
 							aria-labelledby="recent-runs-heading"
-							className="flex max-h-[45%] shrink-0 flex-col border-t bg-white"
+							className="flex max-h-[45%] shrink-0 flex-col border-t bg-card"
 						>
 							<div className="flex h-10 shrink-0 items-center justify-between gap-3 border-b px-4">
 								<h2
@@ -291,7 +291,7 @@ export function LevelView({
 								</h2>
 								<a
 									href={arenaHref({ name: "levels" })}
-									className="text-xs font-medium text-blue-600 hover:underline"
+									className="text-xs font-medium text-primary hover:underline"
 								>
 									All runs
 								</a>

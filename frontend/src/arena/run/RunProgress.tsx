@@ -1,4 +1,3 @@
-import { AlertTriangleIcon, CheckIcon, Loader2Icon } from "lucide-react";
 import { type CSSProperties, useMemo, useState } from "react";
 import { Led } from "@/components/led";
 import { Card } from "@/components/ui/card";
@@ -129,13 +128,13 @@ function CaseQueueRow({
 	const [open, setOpen] = useState(false);
 	const header = (
 		<>
-			<span className="font-mono text-slate-500">
+			<span className="font-mono text-muted-foreground">
 				{item.team === "green" ? item.label : `#${item.label}`}
 			</span>
 			<span
 				className={cn(
 					"truncate",
-					item.team === "red" ? "text-slate-700" : "text-emerald-700",
+					item.team === "red" ? "text-foreground" : "text-arena-defender",
 				)}
 			>
 				{item.attack_type ?? "benign"}
@@ -149,8 +148,8 @@ function CaseQueueRow({
 			data-case={item.label}
 			className={cn(
 				// New cases slide in as they are generated.
-				"flex flex-col gap-1 border-b border-slate-100 px-4 py-2.5 animate-in fade-in-0 slide-in-from-top-1 duration-300",
-				item.id === liveId && "bg-blue-50/50",
+				"flex flex-col gap-1 border-b border-border px-4 py-2.5 animate-in fade-in-0 slide-in-from-top-1 duration-300",
+				item.id === liveId && "bg-primary/10",
 			)}
 		>
 			{item.outcome !== null ? (
@@ -159,7 +158,7 @@ function CaseQueueRow({
 					aria-label={`Replay case ${item.label}`}
 					className={cn(
 						headerClass,
-						"-mx-1 rounded px-1 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-blue-500",
+						"-mx-1 rounded px-1 hover:bg-card focus-visible:outline-2 focus-visible:outline-primary",
 					)}
 				>
 					{header}
@@ -172,7 +171,7 @@ function CaseQueueRow({
 				// biome-ignore lint/a11y/noStaticElementInteractions: see above.
 				<div
 					onClick={() => setOpen((o) => !o)}
-					className="cursor-pointer text-[13px] text-slate-600"
+					className="cursor-pointer text-[13px] text-muted-foreground"
 				>
 					<ExpandableText
 						text={item.input_preview}
@@ -181,7 +180,7 @@ function CaseQueueRow({
 					/>
 				</div>
 			) : (
-				<span className="truncate text-[13px] text-slate-400 italic">
+				<span className="truncate text-[13px] text-muted-foreground italic">
 					{item.team === "red"
 						? "Generated when the case starts"
 						: "Not generated yet"}
@@ -249,63 +248,46 @@ function TeamGeneration({ run, team }: { run: RunDetail; team: Team }) {
 	const text = GENERATION_TEXT[team];
 	const generated = run.cases.filter((c) => c.team === team).length;
 	const total = Math.max(run.progress[team].total, generated);
-	const pct = total > 0 ? (generated / total) * 100 : 0;
 	const busy = status === "generating" || status === "pending";
 	const title = text[status];
 	return (
-		<div
+		<Card
+			accent={
+				team === "red" ? "var(--arena-attacker)" : "var(--arena-defender)"
+			}
 			data-team={team}
 			data-generation={status}
-			className="flex flex-col gap-2 rounded-lg border bg-slate-50/60 p-4"
+			className="gap-3 bg-panel-sunken p-4"
 		>
 			<div className="flex items-center gap-2.5">
-				{busy ? (
-					<Loader2Icon
-						aria-hidden="true"
-						className={cn(
-							"size-4 shrink-0 animate-spin",
-							team === "red" ? "text-red-500" : "text-emerald-600",
-						)}
-					/>
-				) : status === "failed" ? (
-					<AlertTriangleIcon
-						aria-hidden="true"
-						className="size-4 shrink-0 text-red-600"
-					/>
-				) : (
-					<CheckIcon
-						aria-hidden="true"
-						className="size-4 shrink-0 text-emerald-600"
-					/>
-				)}
-				<h3 className="text-sm font-semibold">{title}</h3>
-			</div>
-			<div
-				role="progressbar"
-				aria-label={`${team === "red" ? "Attack" : "Benign"} cases generated`}
-				aria-valuemin={0}
-				aria-valuemax={total}
-				aria-valuenow={generated}
-				className="relative h-2 overflow-hidden rounded-full bg-slate-200"
-			>
-				<div
-					className={cn(
-						"h-full rounded-full transition-[width] duration-500",
-						team === "red" ? "bg-red-500" : "bg-emerald-500",
-					)}
-					style={{ width: `${pct}%` }}
+				<Led
+					tone={busy ? "busy" : status === "failed" ? "error" : "ok"}
+					pulse={busy}
+					aria-hidden="true"
 				/>
-				{busy && (
-					<div
-						aria-hidden="true"
-						className="absolute inset-0 animate-pulse bg-white/30"
-					/>
-				)}
+				<h3 className="font-mono text-xs font-semibold uppercase tracking-wider">
+					{title}
+				</h3>
 			</div>
-			<p className="text-[13px] text-slate-600 tabular-nums">
+			<ProgressBar
+				aria-label={`${team === "red" ? "Attack" : "Benign"} cases generated`}
+				value={generated}
+				max={Math.max(1, total)}
+				cells={24}
+				aria-valuetext={`${generated} of ${total} cases generated`}
+				style={
+					{
+						"--phosphor":
+							team === "red"
+								? "var(--arena-attacker)"
+								: "var(--arena-defender)",
+					} as CSSProperties
+				}
+			/>
+			<p className="text-[13px] text-muted-foreground tabular-nums">
 				{generated} of {total} cases generated
 			</p>
-		</div>
+		</Card>
 	);
 }
 
@@ -314,11 +296,13 @@ function GenerationPanel({ run }: { run: RunDetail }) {
 	return (
 		<section
 			aria-label="Case generation"
-			className="flex min-h-[28rem] flex-col overflow-hidden rounded-xl border bg-white shadow-sm"
+			className="flex min-h-[28rem] flex-col overflow-hidden rounded-none border bg-card shadow-sm"
 		>
 			<div className="flex h-12 shrink-0 items-center gap-3 border-b px-4">
-				<h2 className="text-sm font-semibold">Generating cases</h2>
-				<span className="truncate text-xs text-slate-500">
+				<h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-phosphor-bright">
+					Generating cases
+				</h2>
+				<span className="truncate text-xs text-muted-foreground">
 					the live sample starts with the first case
 				</span>
 			</div>

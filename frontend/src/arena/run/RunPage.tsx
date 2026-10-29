@@ -21,15 +21,6 @@ import { RunProgress } from "./RunProgress";
 import { RunResultsView } from "./RunResults";
 import { isActiveRun, useRunPolling } from "./useRunPolling";
 
-const STATUS_TONES: Record<RunDetail["status"], string> = {
-	generating: "border-primary/30 bg-primary/10 text-primary",
-	running: "border-arena-defender/30 bg-arena-defender/10 text-arena-defender",
-	completed: "border-border bg-card text-foreground",
-	stopped: "border-warning/30 bg-warning/10 text-warning",
-	failed: "border-arena-attacker/30 bg-arena-attacker/10 text-arena-attacker",
-	interrupted: "border-warning/30 bg-warning/10 text-warning",
-};
-
 function StatusPill({ run }: { run: RunDetail }) {
 	const active = isActiveRun(run);
 	return (
@@ -76,10 +67,7 @@ function StopButton({
 	return (
 		<>
 			{error && (
-				<span
-					role="alert"
-					className="max-w-72 text-xs text-arena-attacker"
-				>
+				<span role="alert" className="max-w-72 text-xs text-arena-attacker">
 					<ExpandableText text={error} threshold={40} />
 				</span>
 			)}
@@ -119,10 +107,12 @@ function RunTimes({ run }: { run: RunDetail }) {
 	return (
 		<dl
 			aria-label="Run times"
-			className="flex shrink-0 flex-wrap items-baseline gap-x-6 gap-y-1 border-b bg-white px-4 py-2 text-[13px] lg:px-6"
+			className="flex shrink-0 flex-wrap items-baseline gap-x-6 gap-y-1 border-b bg-card px-4 py-2 text-[13px] lg:px-6"
 		>
 			<div className="flex items-baseline gap-1.5">
-				<dt className="text-slate-500">Started</dt>
+				<dt className="font-mono text-[10px] uppercase tracking-widest text-phosphor-dim">
+					Started
+				</dt>
 				<dd className="font-medium tabular-nums">
 					<time dateTime={run.started_at}>
 						{formatDateTime(run.started_at)}
@@ -130,19 +120,25 @@ function RunTimes({ run }: { run: RunDetail }) {
 				</dd>
 			</div>
 			<div className="flex items-baseline gap-1.5">
-				<dt className="text-slate-500">Ended</dt>
+				<dt className="font-mono text-[10px] uppercase tracking-widest text-phosphor-dim">
+					Ended
+				</dt>
 				<dd className="font-medium tabular-nums">
 					{run.finished_at ? (
 						<time dateTime={run.finished_at}>
 							{formatDateTime(run.finished_at)}
 						</time>
 					) : (
-						<span className="font-normal text-slate-500">still running</span>
+						<span className="font-normal text-muted-foreground">
+							still running
+						</span>
 					)}
 				</dd>
 			</div>
 			<div className="flex items-baseline gap-1.5">
-				<dt className="text-slate-500">Duration</dt>
+				<dt className="font-mono text-[10px] uppercase tracking-widest text-phosphor-dim">
+					Duration
+				</dt>
 				<dd className="font-mono text-xs tabular-nums">
 					{formatClock(run.elapsed)}
 				</dd>

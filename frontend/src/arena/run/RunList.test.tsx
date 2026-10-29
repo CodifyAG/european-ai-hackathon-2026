@@ -1,6 +1,7 @@
 import {
 	act,
 	cleanup,
+	fireEvent,
 	render,
 	screen,
 	waitFor,
@@ -62,6 +63,14 @@ describe("runs overview", () => {
 		]);
 
 		const running = rowOf(list, "run-hm-2");
+		const redMeter = within(running).getByRole("progressbar", {
+			name: "Red cases done",
+		});
+		expect(redMeter).toHaveAttribute("aria-valuenow", "6");
+		expect(redMeter).toHaveAttribute("aria-valuemax", "10");
+		expect(
+			within(running).getByRole("progressbar", { name: "Green cases done" }),
+		).toHaveAttribute("aria-valuenow", "0");
 		expect(running).toHaveTextContent("Level 1 · Hidden Mailbox");
 		expect(running).toHaveTextContent("Hard");
 		expect(within(running).getByText("Running")).toBeInTheDocument();
@@ -86,6 +95,31 @@ describe("runs overview", () => {
 		expect(within(rowOf(list, "run-hm-0")).getByText("Failed")).toBeVisible();
 		// No run-level title recorded: the level list names it.
 		expect(rowOf(list, "run-er-1")).toHaveTextContent("Level 2 · Email Review");
+	});
+
+	it("loads one run list and leaves level selection available when it fails", async () => {
+		window.location.hash = "#/arena";
+		let failed = true;
+		const fetch = mockArenaFetch({
+			[`${API}/levels`]: levelsFixture,
+			[`${API}/runs`]: () =>
+				failed
+					? new Response(JSON.stringify({ detail: "Unavailable" }), {
+							status: 503,
+						})
+					: [runListFixture[0]],
+		});
+		render(<App />);
+		const reload = await screen.findByRole("button", { name: "Reload runs" });
+		expect(runGets(fetch, `${API}/runs`)).toBe(1);
+		expect(
+			screen.getByRole("link", { name: "Level 1 · Hidden Mailbox" }),
+		).toBeVisible();
+		failed = false;
+		fireEvent.click(reload);
+		expect(await screen.findByRole("list", { name: "Runs" })).toBeVisible();
+		expect(screen.queryByRole("region", { name: "Run history" })).toBeNull();
+		expect(runGets(fetch, `${API}/runs`)).toBe(2);
 	});
 
 	it("opens a running run's live view and a finished run's results", async () => {

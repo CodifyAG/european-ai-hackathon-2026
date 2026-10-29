@@ -550,19 +550,6 @@ describe("results", () => {
 		expect(
 			within(asr).getByRole("progressbar", { name: "Attack success rate" }),
 		).toHaveAttribute("aria-valuenow", String((2 / 9) * 100));
-		const decisionBars = within(
-			screen.getByRole("region", { name: "Where it was decided" }),
-		);
-		const attacks = decisionBars.getByRole("progressbar", {
-			name: "Input judge · UNSAFE attacks",
-		});
-		const benign = decisionBars.getByRole("progressbar", {
-			name: "Input judge · UNSAFE benign",
-		});
-		expect(attacks).toHaveAttribute("aria-valuenow", "4");
-		expect(benign).toHaveAttribute("aria-valuenow", "1");
-		expect(attacks).toHaveAttribute("aria-valuemax", "9");
-		expect(benign).toHaveAttribute("aria-valuemax", "9");
 		const fpr = screen.getByTestId("rate-false-positive");
 		expect(fpr).toHaveTextContent("10%");
 		expect(fpr).toHaveTextContent("1 / 10");
@@ -659,11 +646,11 @@ describe("results", () => {
 				by_decision: [],
 			},
 		});
-		const decisions = await screen.findByRole("region", {
-			name: "Where it was decided",
-		});
-		expect(within(decisions).getByText("No decisions recorded.")).toBeVisible();
-		expect(within(decisions).queryByRole("progressbar")).toBeNull();
+		const outcomes = await screen.findByRole("region", { name: "Outcomes" });
+		expect(within(outcomes).getByRole("img")).toBeVisible();
+		expect(
+			screen.queryByRole("region", { name: "Where it was decided" }),
+		).toBeNull();
 		expect(screen.getByText("No red cases.")).toBeVisible();
 	});
 

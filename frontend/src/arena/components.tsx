@@ -11,6 +11,8 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { Led } from "@/components/led";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
@@ -117,7 +119,7 @@ export function ArenaShell({
 							href={back.href}
 							aria-label={back.label}
 							title={back.label}
-							className="flex h-8 shrink-0 items-center gap-1 rounded-md border bg-white px-2.5 text-[13px] font-medium text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-blue-500"
+							className="flex h-8 shrink-0 items-center gap-1 rounded-none border bg-card px-2.5 text-[13px] font-medium text-foreground shadow-xs hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
 						>
 							<ArrowLeftIcon className="size-3.5" aria-hidden="true" />
 							Back
@@ -246,32 +248,40 @@ export function ErrorState({
 }
 
 export const RUN_STATUS_TONES: Record<RunStatus, string> = {
-	generating: "border-blue-200 bg-blue-50 text-blue-700",
-	running: "border-emerald-200 bg-emerald-50 text-emerald-700",
-	completed: "border-slate-200 bg-slate-50 text-slate-700",
-	stopped: "border-amber-200 bg-amber-50 text-amber-800",
-	failed: "border-red-200 bg-red-50 text-red-700",
-	interrupted: "border-amber-200 bg-amber-50 text-amber-800",
+	generating: "border-primary/30 bg-primary/10 text-primary",
+	running: "border-arena-defender/30 bg-arena-defender/10 text-arena-defender",
+	completed: "border-border bg-card text-foreground",
+	stopped: "border-warning/30 bg-warning/10 text-warning",
+	failed: "border-arena-attacker/30 bg-arena-attacker/10 text-arena-attacker",
+	interrupted: "border-warning/30 bg-warning/10 text-warning",
 };
 
 /** Small run status badge; pulses while the run is generating or running. */
 export function RunStatusBadge({ status }: { status: RunStatus }) {
 	return (
-		<span
+		<Badge
+			variant="outline"
 			data-status={status}
 			className={cn(
-				"inline-flex h-5 items-center gap-1.5 rounded-md border px-1.5 text-[11px] font-semibold whitespace-nowrap",
+				"inline-flex h-5 items-center gap-1.5 rounded-none border px-1.5 text-[11px] font-semibold whitespace-nowrap",
 				RUN_STATUS_TONES[status],
 			)}
 		>
-			{ACTIVE_RUN_STATUSES.includes(status) && (
-				<span
-					aria-hidden="true"
-					className="size-1.5 animate-pulse rounded-full bg-current"
-				/>
-			)}
+			<Led
+				tone={
+					ACTIVE_RUN_STATUSES.includes(status)
+						? "busy"
+						: status === "failed"
+							? "error"
+							: status === "completed"
+								? "ok"
+								: "idle"
+				}
+				pulse={ACTIVE_RUN_STATUSES.includes(status)}
+				aria-hidden="true"
+			/>
 			{STATUS_LABELS[status]}
-		</span>
+		</Badge>
 	);
 }
 
@@ -396,7 +406,7 @@ export function ExpandableText({
 						event.stopPropagation();
 						(onOpenChange ?? setOwn)(!expanded);
 					}}
-					className="shrink-0 text-[11px] font-medium whitespace-nowrap text-blue-600 hover:underline focus-visible:outline-2 focus-visible:outline-blue-500"
+					className="shrink-0 text-[11px] font-medium whitespace-nowrap text-primary hover:underline focus-visible:outline-2 focus-visible:outline-primary"
 				>
 					{expanded ? "Show less" : "Show more"}
 				</button>

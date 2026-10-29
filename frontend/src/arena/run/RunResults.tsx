@@ -1,7 +1,11 @@
 import { type CSSProperties, type ReactNode, useState } from "react";
-import { Led } from "@/components/led";
 import { Badge } from "@/components/ui/badge";
-import { Card as AfterglowCard } from "@/components/ui/card";
+import {
+	Card as AfterglowCard,
+	CardAccent,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
 	Table,
@@ -38,36 +42,6 @@ import type {
 import { useArenaQuery } from "../useArenaQuery";
 import { ModelsUsed } from "./RunProgress";
 
-function Card({
-	label,
-	children,
-	caption,
-	testId,
-	accent,
-}: {
-	label: string;
-	children: ReactNode;
-	caption: string;
-	testId?: string;
-	accent: string;
-}) {
-	return (
-		<AfterglowCard
-			accent={accent}
-			role="region"
-			aria-label={label}
-			data-testid={testId}
-			className="gap-3 bg-card p-5"
-		>
-			<h2 className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-				{label}
-			</h2>
-			<div className="flex flex-wrap items-baseline gap-2">{children}</div>
-			<p className="text-xs text-muted-foreground">{caption}</p>
-		</AfterglowCard>
-	);
-}
-
 function RateValue({
 	rate,
 	tone,
@@ -84,7 +58,7 @@ function RateValue({
 			<div className="flex items-baseline gap-2">
 				<span
 					className={cn(
-						"font-mono text-4xl font-semibold tracking-tight",
+						"font-mono text-3xl font-semibold tracking-tight",
 						tone,
 					)}
 				>
@@ -113,26 +87,33 @@ function Panel({
 	title,
 	aside,
 	children,
+	accent = "var(--phosphor)",
 }: {
 	title: string;
 	aside?: string;
+	accent?: string;
 	children: ReactNode;
 }) {
 	return (
 		<AfterglowCard
-			accent={false}
+			accent={accent}
 			role="region"
 			aria-label={title}
-			className="gap-4 bg-card p-5"
+			className="gap-4 bg-card p-4"
 		>
-			<div className="flex items-baseline justify-between gap-3">
-				<h2 className="font-mono text-xs font-semibold uppercase tracking-wider">
+			<CardAccent />
+			<CardHeader className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line px-0 pb-3">
+				<CardTitle
+					role="heading"
+					aria-level={2}
+					className="text-xs uppercase tracking-widest"
+				>
 					{title}
-				</h2>
+				</CardTitle>
 				{aside && (
 					<span className="text-xs text-muted-foreground">{aside}</span>
 				)}
-			</div>
+			</CardHeader>
 			{children}
 		</AfterglowCard>
 	);
@@ -166,7 +147,7 @@ function Cell({
 
 function Matrix({ matrix }: { matrix: RunResults["matrix"] }) {
 	return (
-		<Panel title="Expected vs. outcome">
+		<Panel title="Expected vs. outcome" accent="var(--arena-defender)">
 			<div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 text-[13px]">
 				<span />
 				<span className="text-center text-xs text-muted-foreground">
@@ -204,17 +185,22 @@ const OUTCOME_SLICES: {
 		outcome: "succeeded",
 		team: "Red",
 		label: "attack succeeded",
-		color: "#dc2626",
+		color: "var(--arena-attacker)",
 	},
-	{ outcome: "defended", team: "Red", label: "defended", color: "#059669" },
+	{
+		outcome: "defended",
+		team: "Red",
+		label: "defended",
+		color: "var(--arena-defender)",
+	},
 	{
 		outcome: "false_positive",
 		team: "Green",
 		label: "false positive",
-		color: "#d97706",
+		color: "var(--warning)",
 	},
-	{ outcome: "passed", team: "Green", label: "passed", color: "#0284c7" },
-	{ outcome: "error", team: "Both", label: "errors", color: "#475569" },
+	{ outcome: "passed", team: "Green", label: "passed", color: "var(--azure)" },
+	{ outcome: "error", team: "Both", label: "errors", color: "var(--signal)" },
 ];
 
 const RADIUS = 52;
@@ -236,20 +222,18 @@ function RateLabel({
 	return (
 		<div
 			data-testid={testId}
-			className="flex items-baseline gap-2 rounded-lg bg-slate-50 px-3 py-2"
+			className="flex flex-col gap-2 border border-line border-l-2 bg-panel-sunken px-3 py-3"
+			style={{ borderLeftColor: color }}
 		>
-			<span
-				aria-hidden="true"
-				className="size-2 shrink-0 self-center rounded-sm"
-				style={{ background: color }}
+			<span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+				{label}
+			</span>
+			<RateValue
+				rate={rate}
+				label={label}
+				color={color}
+				tone="text-foreground"
 			/>
-			<span className="text-[13px] text-slate-600">{label}</span>
-			<span className="ml-auto text-lg font-semibold tracking-tight tabular-nums">
-				{formatPercent(rate)}
-			</span>
-			<span className="font-mono text-xs text-slate-500">
-				{rate.numerator} / {rate.denominator}
-			</span>
 		</div>
 	);
 }
@@ -291,8 +275,16 @@ function OutcomeChart({ results }: { results: RunResults }) {
 						cy="70"
 						r={RADIUS}
 						fill="none"
-						stroke="#f1f5f9"
-						strokeWidth="20"
+						stroke="var(--muted)"
+						strokeWidth="12"
+					/>
+					<circle
+						cx="70"
+						cy="70"
+						r="65"
+						fill="none"
+						stroke="var(--line)"
+						strokeDasharray="1 5"
 					/>
 					{arcs.map((arc) => (
 						<circle
@@ -303,7 +295,7 @@ function OutcomeChart({ results }: { results: RunResults }) {
 							r={RADIUS}
 							fill="none"
 							stroke={arc.color}
-							strokeWidth="20"
+							strokeWidth="12"
 							strokeDasharray={`${arc.dash} ${CIRCUMFERENCE - arc.dash}`}
 							strokeDashoffset={-arc.offset}
 							className="transition-opacity hover:opacity-80"
@@ -317,9 +309,18 @@ function OutcomeChart({ results }: { results: RunResults }) {
 						transform="rotate(90 70 70)"
 						textAnchor="middle"
 						dominantBaseline="central"
-						className="fill-slate-900 text-[22px] font-semibold"
+						className="fill-phosphor-bright font-mono text-[26px] font-semibold"
 					>
 						{total}
+					</text>
+					<text
+						x="70"
+						y="91"
+						transform="rotate(90 70 70)"
+						textAnchor="middle"
+						className="fill-muted-foreground font-mono text-[8px] tracking-widest"
+					>
+						CASES
 					</text>
 				</svg>
 				<ul
@@ -330,21 +331,21 @@ function OutcomeChart({ results }: { results: RunResults }) {
 						<li
 							key={slice.outcome}
 							data-outcome={slice.outcome}
-							className="flex items-center gap-2"
+							className="flex items-center gap-2 border-b border-line/50 pb-1.5 last:border-0"
 						>
 							<span
 								aria-hidden="true"
-								className="size-2.5 shrink-0 rounded-sm"
+								className="size-2.5 shrink-0 rounded-none"
 								style={{ background: slice.color }}
 							/>
-							<span className="min-w-0 flex-1 text-slate-700">
-								<span className="text-slate-500">{slice.team}</span> ·{" "}
+							<span className="min-w-0 flex-1 text-foreground">
+								<span className="text-muted-foreground">{slice.team}</span> ·{" "}
 								{slice.label}
 							</span>
 							<span className="font-semibold tabular-nums">
 								{counts[slice.outcome]}
 							</span>
-							<span className="w-9 text-right font-mono text-xs text-slate-500">
+							<span className="w-9 text-right font-mono text-xs text-muted-foreground">
 								{pct(counts[slice.outcome])}
 							</span>
 						</li>
@@ -355,16 +356,16 @@ function OutcomeChart({ results }: { results: RunResults }) {
 				<RateLabel
 					label="Attack success rate"
 					rate={rates.attack_success}
-					color="#dc2626"
+					color="var(--arena-attacker)"
 					testId="rate-attack-success"
 				/>
 				<RateLabel
 					label="False positive rate"
 					rate={rates.false_positive}
-					color="#d97706"
+					color="var(--warning)"
 					testId="rate-false-positive"
 				/>
-				<p className="text-xs text-slate-500">
+				<p className="text-xs text-muted-foreground">
 					Errors are excluded from both rates.
 				</p>
 			</div>
@@ -374,7 +375,11 @@ function OutcomeChart({ results }: { results: RunResults }) {
 
 function ByAttackType({ rows }: { rows: RunResults["by_attack_type"] }) {
 	return (
-		<Panel title="By attack type" aside="succeeded / attempts">
+		<Panel
+			title="By attack type"
+			aside="succeeded / attempts"
+			accent="var(--arena-attacker)"
+		>
 			{rows.length === 0 ? (
 				<p className="text-sm text-muted-foreground">No red cases.</p>
 			) : (
@@ -410,54 +415,6 @@ function ByAttackType({ rows }: { rows: RunResults["by_attack_type"] }) {
 									<Badge variant="signal">{row.errors} error</Badge>
 								)}
 							</div>
-						</li>
-					))}
-				</ul>
-			)}
-		</Panel>
-	);
-}
-
-function ByDecision({ rows }: { rows: RunResults["by_decision"] }) {
-	const max = Math.max(1, ...rows.flatMap((row) => [row.red, row.green]));
-	return (
-		<Panel title="Where it was decided" aside="red · green">
-			<div className="flex gap-3">
-				<Badge variant="destructive">Red / attack</Badge>
-				<Badge>Green / benign</Badge>
-			</div>
-			{rows.length === 0 ? (
-				<p className="text-sm text-muted-foreground">No decisions recorded.</p>
-			) : (
-				<ul className="flex flex-col gap-4">
-					{rows.map((row) => (
-						<li
-							key={JSON.stringify(row.decided_by)}
-							className="flex flex-col gap-2"
-						>
-							<div className="flex flex-wrap items-baseline justify-between gap-2">
-								<span className="text-xs">{row.label}</span>
-								<span className="font-mono text-[11px] text-muted-foreground">
-									{row.red} attack{row.red === 1 ? "" : "s"} · {row.green}{" "}
-									benign
-								</span>
-							</div>
-							<Progress
-								aria-label={`${row.label} attacks`}
-								value={row.red}
-								max={max}
-								style={
-									{ "--phosphor": "var(--arena-attacker)" } as CSSProperties
-								}
-							/>
-							<Progress
-								aria-label={`${row.label} benign`}
-								value={row.green}
-								max={max}
-								style={
-									{ "--phosphor": "var(--arena-defender)" } as CSSProperties
-								}
-							/>
 						</li>
 					))}
 				</ul>
@@ -649,67 +606,6 @@ export function RunResultsView({ run }: { run: RunDetail }) {
 					were run. The results cover the cases that were completed.
 				</p>
 			)}
-			<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-				<Card
-					accent="var(--arena-attacker)"
-					label="Attack success rate"
-					caption="red cases that met the success check (errors excluded)"
-					testId="rate-attack-success"
-				>
-					<RateValue
-						rate={rates.attack_success}
-						tone="text-arena-attacker"
-						label="Attack success rate"
-						color="var(--arena-attacker)"
-					/>
-				</Card>
-				<Card
-					accent="var(--warning)"
-					label="False positive rate"
-					caption="benign cases blocked by a guardrail (errors excluded)"
-					testId="rate-false-positive"
-				>
-					<RateValue
-						rate={rates.false_positive}
-						tone="text-warning"
-						label="False positive rate"
-						color="var(--warning)"
-					/>
-				</Card>
-				<Card
-					accent="var(--arena-defender)"
-					label="Defended"
-					caption="attacks that did not reach the objective"
-					testId="defended"
-				>
-					<span className="font-mono text-4xl font-semibold tracking-tight text-arena-defender">
-						{matrix.red.stopped}
-					</span>
-					<span className="font-mono text-sm text-muted-foreground">
-						/ {rates.attack_success.denominator}
-					</span>
-				</Card>
-				<Card
-					accent="var(--signal)"
-					label="Errors"
-					caption={`red ${results.errors.red} · green ${results.errors.green} · excluded from both rates`}
-					testId="errors"
-				>
-					<span className="font-mono text-4xl font-semibold tracking-tight text-signal">
-						{errorsTotal}
-					</span>
-					<Badge variant={errorsTotal > 0 ? "signal" : "outline"}>
-						<Led
-							tone={errorsTotal > 0 ? "error" : "ok"}
-							pulse={false}
-							aria-hidden="true"
-						/>
-						{errorsTotal > 0 ? "Execution errors" : "No errors"}
-					</Badge>
-				</Card>
-			</div>
-			<div className="grid gap-4 lg:grid-cols-3">
-				<Matrix matrix={matrix} />
 			<div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
 				<Matrix matrix={results.matrix} />
 				<OutcomeChart results={results} />
