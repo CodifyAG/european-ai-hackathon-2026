@@ -23,12 +23,12 @@ function Placeholder({
 			}}
 		>
 			<div className="flex flex-1 items-center justify-center p-10">
-				<div className="flex max-w-md flex-col items-center gap-2 rounded-xl border bg-white p-6 text-center shadow-sm">
+				<div className="flex max-w-md flex-col items-center gap-2 rounded-none border bg-card p-6 text-center shadow-sm">
 					<h1 className="font-semibold">{title}</h1>
-					<p className="text-sm text-slate-500">{text}</p>
+					<p className="text-sm text-muted-foreground">{text}</p>
 					<a
 						href={arenaHref({ name: "levels" })}
-						className="mt-2 text-sm font-medium text-blue-600 hover:underline"
+						className="mt-2 text-sm font-medium text-primary hover:underline"
 					>
 						Go to levels
 					</a>

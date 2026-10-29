@@ -68,10 +68,10 @@ function SourceChoice({
 	const option = (value: Source, label: string, hint: string) => (
 		<label
 			className={cn(
-				"flex cursor-pointer items-start gap-2.5 rounded-lg border bg-white px-3 py-2.5 text-sm transition-colors",
+				"flex cursor-pointer items-start gap-2.5 rounded-none border bg-card px-3 py-2.5 text-sm transition-colors",
 				source === value
-					? "border-blue-500 bg-blue-50/50"
-					: "hover:border-slate-300",
+					? "border-primary/30 bg-primary/10"
+					: "hover:border-border",
 				value === "dataset" && unavailable && "cursor-not-allowed opacity-60",
 			)}
 		>
@@ -82,11 +82,11 @@ function SourceChoice({
 				checked={source === value}
 				disabled={value === "dataset" && unavailable}
 				onChange={() => onSource(value)}
-				className="mt-0.5 accent-blue-600"
+				className="mt-0.5 accent-primary"
 			/>
 			<span className="flex flex-col gap-0.5">
 				<span className="font-medium">{label}</span>
-				<span className="text-xs text-slate-500">{hint}</span>
+				<span className="text-xs text-muted-foreground">{hint}</span>
 			</span>
 		</label>
 	);
@@ -106,14 +106,14 @@ function SourceChoice({
 			</div>
 			{source === "dataset" && datasets.length > 0 && (
 				<div className="flex flex-col gap-1">
-					<label htmlFor={selectId} className="text-xs text-slate-500">
+					<label htmlFor={selectId} className="text-xs text-muted-foreground">
 						{team === "red" ? "Red" : "Green"} dataset
 					</label>
 					<select
 						id={selectId}
 						value={datasetId}
 						onChange={(event) => onDataset(event.target.value)}
-						className="h-9 w-full rounded-md border bg-white px-2.5 text-sm"
+						className="h-9 w-full rounded-none border bg-card px-2.5 text-sm"
 					>
 						{datasets.map((d) => (
 							<option key={d.id} value={d.id}>
@@ -141,18 +141,18 @@ function Section({
 	return (
 		<section
 			aria-label={title}
-			className="flex flex-col gap-3 rounded-xl border bg-slate-50/70 p-4"
+			className="flex flex-col gap-3 rounded-none border bg-card/70 p-4"
 		>
 			<div className="flex flex-wrap items-baseline justify-between gap-2">
 				<h3
 					className={cn(
 						"text-xs font-semibold tracking-[0.08em] uppercase",
-						tone === "red" ? "text-red-600" : "text-emerald-700",
+						tone === "red" ? "text-arena-attacker" : "text-arena-defender",
 					)}
 				>
 					{title}
 				</h3>
-				<div className="text-xs text-slate-500">{summary}</div>
+				<div className="text-xs text-muted-foreground">{summary}</div>
 			</div>
 			{children}
 		</section>
@@ -269,11 +269,11 @@ export function StartRunDialog({
 								{attacks.map((attack) => (
 									<li
 										key={attack.type}
-										className="rounded-md border bg-white px-2 py-1 font-mono text-xs text-slate-700"
+										className="rounded-none border bg-card px-2 py-1 font-mono text-xs text-foreground"
 									>
 										{attack.type} × {attack.attempts}
 										{attack.turns && (
-											<span className="text-slate-400">
+											<span className="text-muted-foreground">
 												{" "}
 												· {attack.turns}-turn
 											</span>
@@ -283,7 +283,7 @@ export function StartRunDialog({
 							</ul>
 						)}
 						{direct ? (
-							<p className="rounded-lg border border-dashed bg-white px-3 py-2.5 text-sm text-slate-600">
+							<p className="rounded-none border border-dashed bg-card px-3 py-2.5 text-sm text-muted-foreground">
 								Red cases are generated during each run: the attacker talks to
 								the agent directly and adapts every turn, so these cases cannot
 								be stored and reused.
@@ -326,12 +326,12 @@ export function StartRunDialog({
 					</Section>
 
 					{datasets.error && (
-						<p role="alert" className="text-sm text-amber-700">
+						<p role="alert" className="text-sm text-warning">
 							Stored datasets could not be loaded: {datasets.error.message}
 						</p>
 					)}
 					{error && (
-						<p role="alert" className="text-sm text-red-600">
+						<p role="alert" className="text-sm text-arena-attacker">
 							The run could not be started: {error}
 						</p>
 					)}

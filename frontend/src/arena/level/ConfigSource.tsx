@@ -26,9 +26,9 @@ const isYaml = (path: string) => /\.ya?ml$/i.test(path);
 type Token = { text: string; className?: string };
 
 const TOKEN_CLASSES = {
-	key: "text-blue-700",
-	string: "text-emerald-700",
-	comment: "text-slate-400",
+	key: "text-primary",
+	string: "text-arena-defender",
+	comment: "text-muted-foreground",
 	placeholder: "text-fuchsia-700",
 } as const;
 
@@ -97,15 +97,15 @@ function Pill({
 	children: ReactNode;
 }) {
 	const tones = {
-		amber: "border-amber-200 bg-amber-50 text-amber-800",
-		blue: "border-blue-200 bg-blue-50 text-blue-700",
-		slate: "border-slate-200 text-slate-500",
-		red: "border-red-200 bg-red-50 text-red-700",
+		amber: "border-warning/30 bg-warning/10 text-warning",
+		blue: "border-primary/30 bg-primary/10 text-primary",
+		slate: "border-border text-muted-foreground",
+		red: "border-arena-attacker/30 bg-arena-attacker/10 text-arena-attacker",
 	};
 	return (
 		<span
 			className={cn(
-				"shrink-0 rounded-md border px-1.5 py-0.5 text-[11px] font-medium",
+				"shrink-0 rounded-none border px-1.5 py-0.5 text-[11px] font-medium",
 				tones[tone],
 			)}
 		>
@@ -125,7 +125,9 @@ function Banner({
 }) {
 	const className = cn(
 		"flex shrink-0 flex-col gap-2 border-b px-3 py-2.5 text-[12.5px] leading-snug",
-		tone === "red" ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-900",
+		tone === "red"
+			? "bg-arena-attacker/10 text-arena-attacker"
+			: "bg-warning/10 text-warning",
 	);
 	return tone === "red" ? (
 		<div role="alert" aria-label={label} className={className}>
@@ -166,7 +168,7 @@ function EditorToolbar({
 		<div className="flex shrink-0 flex-col gap-2 border-b px-3 py-2">
 			<div className="flex flex-wrap items-center gap-2">
 				{editor.editing ? (
-					<span className="text-xs text-slate-600">
+					<span className="text-xs text-muted-foreground">
 						{editor.changed.length
 							? `${editor.changed.length} changed file${editor.changed.length === 1 ? "" : "s"}`
 							: "No changes yet"}
@@ -176,10 +178,12 @@ function EditorToolbar({
 						{modified ? (
 							<Pill tone="amber">Modified</Pill>
 						) : (
-							<span className="text-xs text-slate-500">Repository version</span>
+							<span className="text-xs text-muted-foreground">
+								Repository version
+							</span>
 						)}
 						{editor.notice && (
-							<span role="status" className="text-xs text-emerald-700">
+							<span role="status" className="text-xs text-arena-defender">
 								{editor.notice}
 							</span>
 						)}
@@ -264,8 +268,8 @@ function EditorToolbar({
 					}}
 				>
 					<div className="flex items-center gap-1.5">
-						<label className="flex min-w-0 flex-1 items-center gap-1 rounded-md border px-2 text-xs focus-within:border-blue-400">
-							<span className="text-slate-400">{editor.levelDir}/</span>
+						<label className="flex min-w-0 flex-1 items-center gap-1 rounded-none border px-2 text-xs focus-within:border-primary/30">
+							<span className="text-muted-foreground">{editor.levelDir}/</span>
 							<input
 								aria-label="New file path"
 								value={name}
@@ -278,7 +282,7 @@ function EditorToolbar({
 							Add
 						</Button>
 					</div>
-					<p className="text-[11.5px] text-slate-500">
+					<p className="text-[11.5px] text-muted-foreground">
 						{addError ??
 							"Reference the new file from level.yaml in the same save."}
 					</p>
@@ -359,7 +363,7 @@ export function ConfigSource({
 	return (
 		<section
 			aria-label="Config source"
-			className="flex min-h-0 flex-col border-b bg-white lg:border-r lg:border-b-0"
+			className="flex min-h-0 flex-col border-b bg-card lg:border-r lg:border-b-0"
 		>
 			<div className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
 				<div
@@ -381,17 +385,17 @@ export function ConfigSource({
 								title={f.path}
 								onClick={() => onSelectPath(f.path)}
 								className={cn(
-									"flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[12.5px] whitespace-nowrap transition-colors",
+									"flex shrink-0 items-center gap-1.5 rounded-none px-2.5 py-1.5 text-[12.5px] whitespace-nowrap transition-colors",
 									selected
-										? "bg-slate-100 font-medium text-slate-900"
-										: "text-slate-500 hover:text-slate-900",
-									failed && "text-red-700",
+										? "bg-muted font-medium text-foreground"
+										: "text-muted-foreground hover:text-foreground",
+									failed && "text-arena-attacker",
 								)}
 							>
 								<Icon className="size-3.5" aria-hidden="true" />
 								{f.path}
 								{f.modified && !unsaved && (
-									<span className="rounded bg-amber-100 px-1 text-[10.5px] font-medium text-amber-800">
+									<span className="rounded bg-warning/10 px-1 text-[10.5px] font-medium text-warning">
 										Modified
 									</span>
 								)}
@@ -399,14 +403,14 @@ export function ConfigSource({
 									<span
 										role="img"
 										aria-label="unsaved changes"
-										className="size-1.5 rounded-full bg-blue-500"
+										className="size-1.5 rounded-full bg-primary"
 									/>
 								)}
 								{failed && (
 									<span
 										role="img"
 										aria-label="has errors"
-										className="size-1.5 rounded-full bg-red-500"
+										className="size-1.5 rounded-full bg-arena-attacker"
 									/>
 								)}
 							</button>
@@ -538,7 +542,7 @@ export function ConfigSource({
 						focus={focus}
 					/>
 				) : file ? (
-					<pre className="min-w-max font-mono text-xs leading-[19px] text-slate-800">
+					<pre className="min-w-max font-mono text-xs leading-[19px] text-foreground">
 						{lines.map((line, index) => {
 							const n = index + 1;
 							const on =
@@ -553,13 +557,13 @@ export function ConfigSource({
 										"flex border-l-2 border-transparent pr-4",
 										on &&
 											(problemLinesOfFile.includes(n)
-												? "border-red-500 bg-red-50"
-												: "border-blue-500 bg-blue-50"),
+												? "border-arena-attacker/30 bg-arena-attacker/10"
+												: "border-primary/30 bg-primary/10"),
 									)}
 								>
 									<span
 										aria-hidden="true"
-										className="w-10 shrink-0 pr-3 text-right text-slate-400 select-none"
+										className="w-10 shrink-0 pr-3 text-right text-muted-foreground select-none"
 									>
 										{n}
 									</span>
@@ -573,7 +577,7 @@ export function ConfigSource({
 						})}
 					</pre>
 				) : (
-					<p className="px-4 text-sm text-slate-500">No config files.</p>
+					<p className="px-4 text-sm text-muted-foreground">No config files.</p>
 				)}
 			</div>
 		</section>

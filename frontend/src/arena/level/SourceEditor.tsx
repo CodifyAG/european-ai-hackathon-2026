@@ -60,13 +60,13 @@ export function SourceEditor({
 	return (
 		<div
 			ref={scroller}
-			className="min-h-0 flex-1 overflow-auto bg-white"
+			className="min-h-0 flex-1 overflow-auto bg-card"
 			style={{ paddingTop: PADDING_TOP, paddingBottom: PADDING_TOP }}
 		>
 			<div className="flex min-w-full font-mono text-xs leading-[19px]">
 				<div
 					aria-hidden="true"
-					className="sticky left-0 z-10 w-10 shrink-0 bg-white pr-3 text-right text-slate-400 select-none"
+					className="sticky left-0 z-10 w-10 shrink-0 bg-card pr-3 text-right text-muted-foreground select-none"
 				>
 					{lines.map((_, index) => {
 						const n = index + 1;
@@ -74,7 +74,9 @@ export function SourceEditor({
 							<div
 								key={n}
 								data-error-line={marked.has(n) || undefined}
-								className={cn(marked.has(n) && "font-semibold text-red-600")}
+								className={cn(
+									marked.has(n) && "font-semibold text-arena-attacker",
+								)}
 							>
 								{n}
 							</div>
@@ -86,7 +88,7 @@ export function SourceEditor({
 						<div
 							key={line}
 							aria-hidden="true"
-							className="absolute inset-x-0 border-l-2 border-red-500 bg-red-50"
+							className="absolute inset-x-0 border-l-2 border-arena-attacker/30 bg-arena-attacker/10"
 							style={{ top: (line - 1) * LINE_HEIGHT, height: LINE_HEIGHT }}
 						/>
 					))}
@@ -101,7 +103,7 @@ export function SourceEditor({
 						autoComplete="off"
 						autoCorrect="off"
 						wrap="off"
-						className="relative block resize-none overflow-hidden border-0 bg-transparent p-0 pr-4 pl-1 font-mono text-xs leading-[19px] whitespace-pre text-slate-800 outline-none"
+						className="relative block resize-none overflow-hidden border-0 bg-transparent p-0 pr-4 pl-1 font-mono text-xs leading-[19px] whitespace-pre text-foreground outline-none"
 						style={{
 							height: lines.length * LINE_HEIGHT,
 							width: `calc(${longest + 4}ch + 1.25rem)`,

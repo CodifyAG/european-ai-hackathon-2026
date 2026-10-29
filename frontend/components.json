@@ -11,6 +11,9 @@
 		"prefix": ""
 	},
 	"iconLibrary": "lucide",
+	"registries": {
+		"@afterglow": "https://afterglow.thebuilder.dk/r/{name}.json"
+	},
 	"aliases": {
 		"components": "@/components",
 		"utils": "@/lib/utils",

@@ -547,6 +547,9 @@ describe("results", () => {
 		const asr = await screen.findByTestId("rate-attack-success");
 		expect(asr).toHaveTextContent("22.2%");
 		expect(asr).toHaveTextContent("2 / 9");
+		expect(
+			within(asr).getByRole("progressbar", { name: "Attack success rate" }),
+		).toHaveAttribute("aria-valuenow", String((2 / 9) * 100));
 		const fpr = screen.getByTestId("rate-false-positive");
 		expect(fpr).toHaveTextContent("10%");
 		expect(fpr).toHaveTextContent("1 / 10");
@@ -600,11 +603,15 @@ describe("results", () => {
 		).toHaveTextContent("1");
 
 		const byType = screen.getByRole("region", { name: "By attack type" });
-		expect(
-			within(byType)
-				.getAllByRole("listitem")
-				.map((li) => li.textContent),
-		).toEqual(["prompt_injection1 / 5 · 1 error", "linear_jailbreaking1 / 5"]);
+		const attacksByType = within(byType).getAllByRole("listitem");
+		expect(attacksByType).toHaveLength(2);
+		expect(within(attacksByType[0]).getByText("1 / 5")).toBeVisible();
+		expect(within(attacksByType[0]).getByText("3 defended")).toBeVisible();
+		expect(within(attacksByType[1]).getByText("4 defended")).toBeVisible();
+		expect(within(attacksByType[0]).getByRole("progressbar")).toHaveAttribute(
+			"aria-valuetext",
+			"1 succeeded, 3 defended, 1 errors, 5 attempts",
+		);
 
 		// The models used stay visible after the run (AC-9).
 		fireEvent.click(screen.getByText("Models used"));
@@ -623,10 +630,28 @@ describe("results", () => {
 			},
 		});
 		const fpr = await screen.findByTestId("rate-false-positive");
-		expect(fpr).toHaveTextContent("—0 / 0");
+		expect(fpr).toHaveTextContent("—0 / 0No evaluated cases");
+		expect(within(fpr).queryByRole("progressbar")).toBeNull();
 		expect(screen.getByTestId("rate-attack-success")).toHaveTextContent(
 			"11.1%",
 		);
+	});
+
+	it("shows empty breakdowns without inventing chart values", async () => {
+		renderAt("#/arena/runs/run-hm-1", {
+			[`${API}/runs/run-hm-1`]: hiddenMailboxRunCompleted,
+			[`${API}/runs/run-hm-1/results`]: {
+				...hiddenMailboxResults,
+				by_attack_type: [],
+				by_decision: [],
+			},
+		});
+		const outcomes = await screen.findByRole("region", { name: "Outcomes" });
+		expect(within(outcomes).getByRole("img")).toBeVisible();
+		expect(
+			screen.queryByRole("region", { name: "Where it was decided" }),
+		).toBeNull();
+		expect(screen.getByText("No red cases.")).toBeVisible();
 	});
 
 	it("filters the case list and opens the replay", async () => {

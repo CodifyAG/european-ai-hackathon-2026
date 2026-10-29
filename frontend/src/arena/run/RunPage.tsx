@@ -1,5 +1,6 @@
 import { DownloadIcon, PlayIcon, SquareIcon } from "lucide-react";
 import { useState } from "react";
+import { Led } from "@/components/led";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
@@ -31,12 +32,19 @@ function StatusPill({ run }: { run: RunDetail }) {
 				RUN_STATUS_TONES[run.status],
 			)}
 		>
-			{active && (
-				<span
-					aria-hidden="true"
-					className="size-1.5 animate-pulse rounded-full bg-current"
-				/>
-			)}
+			<Led
+				tone={
+					active
+						? "busy"
+						: run.status === "failed"
+							? "error"
+							: run.status === "completed"
+								? "ok"
+								: "idle"
+				}
+				pulse={active}
+				aria-hidden="true"
+			/>
 			{STATUS_LABELS[run.status]}
 			{!active && ` · ${run.cases.length} cases`}
 			<span className="font-mono tabular-nums">
@@ -59,7 +67,7 @@ function StopButton({
 	return (
 		<>
 			{error && (
-				<span role="alert" className="max-w-72 text-xs text-red-600">
+				<span role="alert" className="max-w-72 text-xs text-arena-attacker">
 					<ExpandableText text={error} threshold={40} />
 				</span>
 			)}
@@ -67,7 +75,7 @@ function StopButton({
 				type="button"
 				size="sm"
 				variant="outline"
-				className="border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
+				className="border-arena-attacker/30 text-arena-attacker hover:bg-arena-attacker/10 hover:text-arena-attacker"
 				disabled={stopping}
 				onClick={async () => {
 					setStopping(true);
@@ -99,10 +107,12 @@ function RunTimes({ run }: { run: RunDetail }) {
 	return (
 		<dl
 			aria-label="Run times"
-			className="flex shrink-0 flex-wrap items-baseline gap-x-6 gap-y-1 border-b bg-white px-4 py-2 text-[13px] lg:px-6"
+			className="flex shrink-0 flex-wrap items-baseline gap-x-6 gap-y-1 border-b bg-card px-4 py-2 text-[13px] lg:px-6"
 		>
 			<div className="flex items-baseline gap-1.5">
-				<dt className="text-slate-500">Started</dt>
+				<dt className="font-mono text-[10px] uppercase tracking-widest text-phosphor-dim">
+					Started
+				</dt>
 				<dd className="font-medium tabular-nums">
 					<time dateTime={run.started_at}>
 						{formatDateTime(run.started_at)}
@@ -110,19 +120,25 @@ function RunTimes({ run }: { run: RunDetail }) {
 				</dd>
 			</div>
 			<div className="flex items-baseline gap-1.5">
-				<dt className="text-slate-500">Ended</dt>
+				<dt className="font-mono text-[10px] uppercase tracking-widest text-phosphor-dim">
+					Ended
+				</dt>
 				<dd className="font-medium tabular-nums">
 					{run.finished_at ? (
 						<time dateTime={run.finished_at}>
 							{formatDateTime(run.finished_at)}
 						</time>
 					) : (
-						<span className="font-normal text-slate-500">still running</span>
+						<span className="font-normal text-muted-foreground">
+							still running
+						</span>
 					)}
 				</dd>
 			</div>
 			<div className="flex items-baseline gap-1.5">
-				<dt className="text-slate-500">Duration</dt>
+				<dt className="font-mono text-[10px] uppercase tracking-widest text-phosphor-dim">
+					Duration
+				</dt>
 				<dd className="font-mono text-xs tabular-nums">
 					{formatClock(run.elapsed)}
 				</dd>
@@ -145,7 +161,7 @@ function RunNotices({ run }: { run: RunDetail }) {
 		<div
 			role="alert"
 			aria-label="Run problems"
-			className="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800"
+			className="border-b border-arena-attacker/30 bg-arena-attacker/10 px-4 py-2 text-sm text-arena-attacker"
 		>
 			{notices.map((notice) => (
 				<p key={notice}>{notice}</p>
@@ -221,7 +237,7 @@ export function RunPage({ runId }: { runId: string }) {
 			{run && error && active && (
 				<p
 					role="alert"
-					className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900"
+					className="border-b border-warning/30 bg-warning/10 px-4 py-2 text-sm text-warning"
 				>
 					Live updates are failing ({error.message}). Retrying…
 				</p>

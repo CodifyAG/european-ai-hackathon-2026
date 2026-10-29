@@ -1,0 +1,43 @@
+.guardrail-arena .arena-flow.react-flow {
+	background: var(--background);
+	color: var(--foreground);
+	font-family: var(--font-mono);
+	--xy-node-color-default: var(--foreground);
+	--xy-node-background-color-default: var(--card);
+	--xy-node-border-default: 1px solid var(--border);
+	--xy-edge-stroke-default: var(--phosphor-dim);
+	--xy-edge-stroke-selected-default: var(--phosphor-bright);
+	--xy-connectionline-stroke-default: var(--phosphor);
+	--xy-handle-background-color-default: var(--phosphor);
+	--xy-handle-border-color-default: var(--background);
+	--xy-controls-button-background-color-default: var(--card);
+	--xy-controls-button-background-color-hover-default: var(--accent);
+	--xy-controls-button-color-default: var(--foreground);
+	--xy-controls-button-color-hover-default: var(--accent-foreground);
+	--xy-controls-button-border-color-default: var(--border);
+	--xy-controls-box-shadow-default: none;
+	--xy-background-pattern-dots-color-default: var(--border);
+	--xy-minimap-background-color-default: var(--card);
+	--xy-attribution-background-color-default: var(--background);
+	--xy-selection-background-color-default: color-mix(
+		in srgb,
+		var(--phosphor) 10%,
+		transparent
+	);
+	--xy-selection-border-default: 1px solid var(--phosphor);
+}
+.arena-node-card {
+	background: var(--card);
+	backdrop-filter: none;
+}
+.arena-node:has([data-highlight="current"]) > .arena-node-card {
+	box-shadow: 0 0 18px color-mix(in srgb, var(--card-accent) 22%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+	.react-flow__edge.animated path {
+		animation: none;
+	}
+	.animate-pulse {
+		animation: none;
+	}
+}
