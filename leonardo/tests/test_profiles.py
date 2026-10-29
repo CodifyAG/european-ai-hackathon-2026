@@ -94,10 +94,18 @@ class GatewayRendering(unittest.TestCase):
             entry = config.split(route, 1)[1].split('    - name:', 1)[0]
             self.assertIn('baseUrl: http://b300-router:8080/v1', entry)
             self.assertIn('file: /var/run/leonardo-router/token', entry)
-        # Route name == served name: no rewrite towards either upstream (only the "*" fallback has one).
-        self.assertNotIn('transformation:', config[:config.index('    - name: "*"')])
         self.assertEqual(config.count('    - name: glm-5.3-flash-b300\n'), 1)
         self.assertEqual(config.count('    - name: glm-5.3-flash-leonardo\n'), 1)
+
+    def test_b300_glm_translates_legacy_name_without_changing_leonardo_route(self):
+        config = (REPO / 'infrastructure/leonardo/agentgateway.yaml').read_text()
+        b300 = config.split('    - name: glm-5.3-flash-b300\n', 1)[1].split('    - name:', 1)[0]
+        self.assertIn('baseUrl: http://b300-router:8080/v1', b300)
+        self.assertIn('      transformation:\n        model: \'"glm-5.3-flash-leonardo"\'', b300)
+        leonardo = config.split('    - name: glm-5.3-flash-leonardo\n', 1)[1].split('    - name:', 1)[0]
+        self.assertIn('baseUrl: http://leonardo-router:8080/v1', leonardo)
+        self.assertNotIn('transformation:', leonardo)
+        self.assertEqual(config[:config.index('    - name: "*"')].count('transformation:'), 1)
 
 
 class Profiles(unittest.TestCase):

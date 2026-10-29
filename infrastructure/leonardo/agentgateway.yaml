@@ -89,6 +89,8 @@ llm:
       provider: openAI
       params:
         baseUrl: http://b300-router:8080/v1
+      transformation:
+        model: '"glm-5.3-flash-leonardo"'
       auth:
         key:
           file: /var/run/leonardo-router/token
