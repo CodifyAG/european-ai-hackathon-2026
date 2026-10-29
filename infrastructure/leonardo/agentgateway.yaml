@@ -99,6 +99,13 @@ llm:
       auth:
         key:
           file: /var/run/leonardo-router/token
+    - name: glm-5.3-flash-uncensored-fp8-leonardo
+      provider: openAI
+      params:
+        baseUrl: http://leonardo-router:8080/v1
+      auth:
+        key:
+          file: /var/run/leonardo-router/token
     - name: gpt-oss-safeguard-20b-b300
       provider: openAI
       params:

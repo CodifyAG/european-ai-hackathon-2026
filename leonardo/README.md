@@ -11,6 +11,7 @@ moderation classifiers. It is a reusable template: everything below starts from 
 | --- | --- | --- | --- | --- | --- |
 | `qwen235b` | Qwen3-235B-A22B-FP8 | `qwen3-235b-a22b-fp8-leonardo` | 2 nodes, 8 A100 | 13.4 min | GPU-validated, current CLI and router |
 | `glm53` | GLM-5.3-Flash | `glm-5.3-flash-leonardo` | 2 nodes, 8 A100 | 9.1 min | GPU-validated, current CLI and router |
+| `glm53-abliterated` | GLM-5.3-Flash-Uncensored-FP8 | `glm-5.3-flash-uncensored-fp8-leonardo` | 2 nodes, 8 A100 | | not yet GPU-validated |
 | `deepseek41` | DeepSeek-V4.1-Flash-1017 | `deepseek-v4.1-flash-1017-leonardo` | 2 nodes, 8 A100 | 24.5 min | GPU-validated, current CLI and router |
 | `deepseek41-16gpu` | DeepSeek-V4.1-Flash-1017 | `deepseek-v4.1-flash-1017-16gpu-leonardo` | 4 nodes, 16 A100 | 18.3 min | GPU-validated, current CLI and router |
 | `glm53-16gpu` | GLM-5.3-Flash, 131,072-token context | `glm-5.3-flash-leonardo` | 4 nodes, 16 A100 | | not yet GPU-validated; see [docs/glm16.md](docs/glm16.md) |
@@ -162,6 +163,24 @@ A profile without a pinned model `revision` downloads the current one and prints
 its log; put that sha into the profile. `install` accepts several profiles (`install qwen06b qwen235b`),
 skips what is already there, and installs a runtime only once for all profiles that use it. For gated
 models on Hugging Face, put `export HF_TOKEN=...` into your `~/.bashrc` on Leonardo before installing.
+
+For the abliterated GLM checkpoint from `fork/abliterated-model`:
+
+```bash
+./leonardo/cli.py install glm53-abliterated
+./leonardo/cli.py status                     # wait for CHECKPOINT_READY
+./leonardo/cli.py up glm53-abliterated
+```
+
+This profile pins `Subnet46/GLM-5.3-Flash-Uncensored-FP8` to
+`a0443cf77a142f8173c80c6cb38f40c103d4cc19`. It reuses the existing Leonardo
+GLM runtime, but installs its own checkpoint: all 62 weight shards differ from
+the official model, requiring about 328 GB of additional storage and downloads.
+It retains the original eight-GPU profile's 2,048-token combined input/output
+limit; reserve room for the prompt when choosing output tokens. Its separate
+gateway route uses `leonardo-router`; B300 model routes and app defaults stay
+unchanged. Regenerate/deploy the Leonardo gateway configuration before using
+the new model through GKE. The abliterated checkpoint still needs GPU validation.
 
 ### Start and stop model servers
 

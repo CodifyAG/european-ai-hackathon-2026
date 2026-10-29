@@ -267,6 +267,27 @@ async def test_generate_one_shapes_indirect_and_direct_attacks(monkeypatch):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("attack_type", "expected"),
+    [("leetspeak", "7357"), ("rot13", "grfg"), ("base64", "dGVzdA==")],
+)
+async def test_generate_one_applies_real_encoding_attacks(
+    monkeypatch, attack_type, expected
+):
+    class FakeModel:
+        async def a_generate(self, prompt, schema):
+            assert schema is arena.InitialAttack
+            return schema(input="test"), 0
+
+    monkeypatch.setattr(arena, "model_for", lambda *_: FakeModel())
+
+    result = await arena.generate_one(
+        arena.GenerateRequest.model_validate(body("direct")), attack_type
+    )
+    assert result == {"attack_type": attack_type, "input": expected}
+
+
+@pytest.mark.asyncio
 async def test_generate_one_accepts_flat_injection_fields_from_model(monkeypatch):
     class FakeModel:
         async def a_generate(self, prompt, schema):

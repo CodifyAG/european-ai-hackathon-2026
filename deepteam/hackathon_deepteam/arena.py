@@ -256,7 +256,11 @@ async def generate_one(body: GenerateRequest, attack_type: str) -> dict[str, Any
     baseline, _ = await attacker.a_generate(prompt, schema=InitialAttack)
     if not baseline.input.strip():
         raise ValueError("Attacker produced an empty input")
-    enhanced = await SINGLE_ATTACKS[attack_type]().a_enhance(baseline.input, simulator)
+    attack = SINGLE_ATTACKS[attack_type]()
+    if attack_type in {"leetspeak", "rot13", "base64"}:
+        enhanced = await attack.a_enhance(baseline.input)
+    else:
+        enhanced = await attack.a_enhance(baseline.input, simulator)
     if not isinstance(enhanced, str) or not enhanced.strip():
         raise ValueError("DeepTeam produced an empty attack")
     if body.surface.channel == "direct":
